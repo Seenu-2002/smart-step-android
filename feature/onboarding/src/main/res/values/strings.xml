@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="enable_access_manually">Enable access manually</string>
+    <string name="track_steps_permission_msg">To track your steps, please enable the permission in your device settings.</string>
+    <string name="open_permissions">Open Permissions</string>
+    <string name="tap_physical_activity">Tap Physical Activity</string>
+    <string name="select_allow">Select Allow</string>
+    <string name="open_settings">Open Settings</string>
+    <string name="allow_access">Allow Access</string>
+    <string name="motion_sensor_permission_msg">To count your steps, Smart Step needs access to your motion sensors.</string>
+    <string name="background_access_recommended">Background access recommended</string>
+    <string name="background_access_recommended_msg">Background access helps Smart Step track your activity more reliably.</string>
+    <string name="label_continue">Continue</string>
+    <string name="my_profile">My Profile</string>
+    <string name="skip">Skip</string>
+    <string name="information_msg">This information helps calculate your activity more accurately.</string>
+    <string name="start">Start</string>
+</resources>

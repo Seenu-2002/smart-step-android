@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="height">Height</string>
+    <string name="weight">Weight</string>
+    <string name="usage_msg">Used to calculate distance</string>
+    <string name="unit_cm">cm</string>
+    <string name="unit_ft_inches">ft/in</string>
+    <string name="unit_kg">kg</string>
+    <string name="unit_lbs">lbs</string>
+    <string name="cancel">Cancel</string>
+    <string name="ok">Ok</string>
+</resources>

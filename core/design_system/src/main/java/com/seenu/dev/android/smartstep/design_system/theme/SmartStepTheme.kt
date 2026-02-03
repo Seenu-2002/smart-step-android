@@ -62,7 +62,7 @@ fun SmartStepTheme(content: @Composable () -> Unit) {
             onPrimary = TextPrimary,
             onSecondary = TextSecondary,
             background = BackgroundMain,
-            surface = BackgroundMain,
+            surface = Surface,
             outline = StrokeMain
         ),
         typography = MaterialTheme.typography.copy(
