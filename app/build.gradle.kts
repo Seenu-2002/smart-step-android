@@ -46,8 +46,16 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    // Splash
+    implementation(libs.core.splashscreen)
+
+    // Nav3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
     // Modules
     implementation(projects.core.designSystem)
     implementation(projects.core.data)
     implementation(projects.core.domain)
+    implementation(projects.feature.onboarding)
 }
