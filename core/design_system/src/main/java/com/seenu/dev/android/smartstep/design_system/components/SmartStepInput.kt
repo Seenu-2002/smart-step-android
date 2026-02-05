@@ -4,10 +4,15 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -25,10 +30,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.dropShadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.PopupProperties
 import com.seenu.dev.android.core.design_system.R
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
@@ -131,40 +138,37 @@ fun SmartStepDropdown(
     require(options.contains(selectedOption)) {
         "Selected option must be present in the options list"
     }
-    ExposedDropdownMenuBox(
+
+    Box(
         modifier = modifier
-            .dropShadow(
-                shape = MaterialTheme.shapes.medium,
-                shadow = androidx.compose.ui.graphics.shadow.Shadow(
-                    color = Color(0x29101828),
-                    radius = 16.dp,
-                    spread = -(4).dp,
-                    offset = DpOffset(0.dp, 12.dp)
-                )
-            )
             .background(
                 color = MaterialTheme.colorScheme.surface,
                 shape = MaterialTheme.shapes.medium
             )
-            .clip(MaterialTheme.shapes.medium),
-        expanded = isExpanded,
-        onExpandedChange = onExpandChange
+            .clip(MaterialTheme.shapes.medium)
     ) {
         SmartStepDropDownField(
             selected = selectedOption,
             label = label,
             isExpanded = isExpanded,
-            modifier = Modifier.menuAnchor(type = ExposedDropdownMenuAnchorType.PrimaryEditable)
+            onClick = {
+                onExpandChange(!isExpanded)
+            },
+            modifier = Modifier
         )
 
-        ExposedDropdownMenu(
+        DropdownMenu(
             expanded = isExpanded,
             onDismissRequest = {
                 onExpandChange(false)
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(6.dp)
+                .padding(6.dp),
+            properties = PopupProperties(
+                usePlatformDefaultWidth = true
+            ),
+            containerColor = MaterialTheme.colorScheme.surface
         ) {
             for (option in options) {
                 val isSelected = option == selectedOption

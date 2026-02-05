@@ -11,7 +11,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -25,16 +28,19 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.seenu.dev.android.smartstep.design_system.components.ScrollableHapticContainer
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepDropDownField
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepDropdown
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
+import com.seenu.dev.android.smartstep.design_system.theme.backgroundTertiary
 import com.seenu.dev.android.smartstep.design_system.theme.bodyLargeMedium
 import com.seenu.dev.android.smartstep.design_system.theme.textWhite
 
@@ -126,17 +132,17 @@ fun ProfileSetupScreen(onSkip: () -> Unit = {}) {
 //                                isExpanded = !isExpanded
 //                            }
 //                        )
-                        SmartStepDropdown(
-                            selectedOption = "Female",
-                            options = listOf("Male", "Female"),
-                            onOptionSelected = { isExpanded = false },
-                            onExpandChange = {
-                                isExpanded = it
-                            },
-                            isExpanded = isExpanded,
-                            label = "Gender",
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                    SmartStepDropdown(
+                        selectedOption = "Female",
+                        options = listOf("Male", "Female"),
+                        onOptionSelected = { isExpanded = false },
+                        onExpandChange = {
+                            isExpanded = it
+                        },
+                        isExpanded = isExpanded,
+                        label = "Gender",
+                        modifier = Modifier.fillMaxWidth()
+                    )
 //                    }
                 }
             }
@@ -152,6 +158,38 @@ fun ProfileSetupScreen(onSkip: () -> Unit = {}) {
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.textWhite
                 )
+            }
+
+            BasicAlertDialog(
+                onDismissRequest = {}
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .size(200.dp)
+                        .background(color = MaterialTheme.colorScheme.surface),
+                    contentAlignment = Alignment.Center
+                ) {
+                    ScrollableHapticContainer(
+                        options = (4000..10000).step(1000).map { it.toString() },
+                        visibleCount = 5,
+                        itemHeight = 40.dp,
+                        modifier = Modifier.align(Alignment.Center),
+                        content = { it, isSelected ->
+                            Text(
+                                text = it,
+                                style = if (isSelected) {
+                                    MaterialTheme.typography.bodyLargeMedium
+                                } else {
+                                    MaterialTheme.typography.bodyLarge
+                                },
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                modifier = Modifier.fillMaxWidth(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    )
+                }
             }
         }
     }
