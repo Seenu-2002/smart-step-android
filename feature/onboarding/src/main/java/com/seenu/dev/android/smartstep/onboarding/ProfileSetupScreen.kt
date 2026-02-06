@@ -159,38 +159,6 @@ fun ProfileSetupScreen(onSkip: () -> Unit = {}) {
                     color = MaterialTheme.colorScheme.textWhite
                 )
             }
-
-            BasicAlertDialog(
-                onDismissRequest = {}
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .size(200.dp)
-                        .background(color = MaterialTheme.colorScheme.surface),
-                    contentAlignment = Alignment.Center
-                ) {
-                    ScrollableHapticContainer(
-                        options = (4000..10000).step(1000).map { it.toString() },
-                        visibleCount = 5,
-                        itemHeight = 40.dp,
-                        modifier = Modifier.align(Alignment.Center),
-                        content = { it, isSelected ->
-                            Text(
-                                text = it,
-                                style = if (isSelected) {
-                                    MaterialTheme.typography.bodyLargeMedium
-                                } else {
-                                    MaterialTheme.typography.bodyLarge
-                                },
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                modifier = Modifier.fillMaxWidth(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    )
-                }
-            }
         }
     }
 }

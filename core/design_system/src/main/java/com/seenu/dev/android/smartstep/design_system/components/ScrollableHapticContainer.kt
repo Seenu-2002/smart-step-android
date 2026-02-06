@@ -1,7 +1,5 @@
 package com.seenu.dev.android.smartstep.design_system.components
 
-import android.util.Log
-import androidx.compose.animation.core.snap
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -14,10 +12,10 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,23 +23,34 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.onGloballyPositioned
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
+import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundTertiary
 import kotlinx.coroutines.launch
+import kotlin.math.abs
 
 @Preview
 @Composable
 private fun ScrollableHapticContainer_Preview() {
     SmartStepTheme {
+        var activeIndex by remember {
+            mutableStateOf(0)
+        }
         ScrollableHapticContainer(
             options = (1000..10000).step(1000).map { it.toString() },
             visibleCount = 5,
             itemHeight = 20.dp,
+            activeIndex = activeIndex,
+            onActiveIndexChange = {
+                activeIndex = it
+            },
             modifier = Modifier,
             content = { _, _ ->
                 Text(
@@ -56,13 +65,29 @@ private fun ScrollableHapticContainer_Preview() {
 @Composable
 fun ScrollableHapticContainer(
     options: List<String>,
+    activeIndex: Int,
+    onActiveIndexChange: (Int) -> Unit,
     visibleCount: Int,
     itemHeight: Dp,
     content: @Composable BoxScope.(String, Boolean) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    showFadeEffect: Boolean = true,
+    containerColor: Color = MaterialTheme.colorScheme.backgroundSecondary,
+    selectedBox: @Composable () -> Unit = {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(height = itemHeight)
+                .background(color = MaterialTheme.colorScheme.backgroundTertiary)
+        )
+    }
 ) {
     require(visibleCount % 2 == 1) {
         "Visible count should be an odd number to ensure that the selected item is always in the center."
+    }
+
+    require(activeIndex in options.indices) {
+        "Active index should be within the bounds of the options list."
     }
     Box(
         modifier = modifier.height(
@@ -70,23 +95,38 @@ fun ScrollableHapticContainer(
         ),
         contentAlignment = Alignment.Center
     ) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height = itemHeight)
-                .background(color = MaterialTheme.colorScheme.backgroundTertiary)
-        )
+        selectedBox()
+
         val state = rememberLazyListState()
         val snap = rememberSnapFlingBehavior(state)
         val noOfEmptySpaces = visibleCount / 2
         val scope = rememberCoroutineScope()
 
-        var activeIndex by remember {
-            mutableStateOf(0)
+        LaunchedEffect(state.layoutInfo) {
+            val layoutInfo = state.layoutInfo
+            val visibleItems = layoutInfo.visibleItemsInfo
+
+            val viewportCenter =
+                layoutInfo.viewportStartOffset +
+                        (layoutInfo.viewportSize.height / 2)
+
+            val index = visibleItems.minByOrNull { item ->
+                abs(
+                    (item.offset + item.size / 2) - viewportCenter
+                )
+            }?.index?.minus(visibleCount / 2) ?: 0
+            onActiveIndexChange(index)
         }
 
-        LaunchedEffect(state.firstVisibleItemIndex) {
-            activeIndex = state.firstVisibleItemIndex
+        val hapticFeedback = LocalHapticFeedback.current
+        LaunchedEffect(activeIndex) {
+            hapticFeedback.performHapticFeedback(
+                HapticFeedbackType.TextHandleMove
+            )
+        }
+
+        LaunchedEffect(Unit) {
+            state.scrollToItem(activeIndex)
         }
 
         LazyColumn(
@@ -114,6 +154,27 @@ fun ScrollableHapticContainer(
             items(noOfEmptySpaces) {
                 Box(modifier = Modifier.height(itemHeight))
             }
+        }
+
+        if (showFadeEffect) {
+            val colors = remember {
+                mutableListOf<Color>().apply {
+                    add(containerColor)
+                    repeat(visibleCount - 2) {
+                        add(Color.Transparent)
+                    }
+                    add(containerColor)
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = colors
+                        )
+                    )
+            )
         }
     }
 }

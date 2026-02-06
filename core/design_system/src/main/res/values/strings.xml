@@ -6,6 +6,8 @@
     <string name="unit_cm">cm</string>
     <string name="unit_ft_inches">ft/in</string>
     <string name="unit_kg">kg</string>
+    <string name="unit_ft">ft</string>
+    <string name="unit_inches">in</string>
     <string name="unit_lbs">lbs</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
