@@ -53,6 +53,9 @@ dependencies {
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
 
+    // WindowSize
+    implementation(libs.window.size)
+
     // Modules
     implementation(projects.core.designSystem)
     implementation(projects.core.data)

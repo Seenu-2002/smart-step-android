@@ -4,15 +4,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.NavEntry
-import androidx.navigation3.runtime.NavKey
-import androidx.navigation3.ui.NavDisplay
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
+import androidx.navigation3.ui.NavDisplay
+import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.onboarding.ProfileSetupScreen
-import kotlin.collections.listOf
 
 @Composable
-fun SmartStepNavigation() {
+fun SmartStepNavigation(
+    adaptiveLayoutType: AdaptiveLayoutType
+) {
     val backstack = rememberNavBackStack(Route.ProfileSetupScreen)
     NavDisplay(
         backStack = backstack,
@@ -24,6 +25,7 @@ fun SmartStepNavigation() {
                 Route.ProfileSetupScreen -> {
                     NavEntry(key) {
                         ProfileSetupScreen(
+                            adaptiveLayoutType = adaptiveLayoutType,
                             onSkip = {
                                 TODO()
                             }
