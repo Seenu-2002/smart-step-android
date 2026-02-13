@@ -10,7 +10,6 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
-import com.seenu.dev.android.smartstep.home.HomeScreen
 import com.seenu.dev.android.smartstep.navigation.SmartStepNavigation
 
 class MainActivity : ComponentActivity() {
@@ -24,8 +23,7 @@ class MainActivity : ComponentActivity() {
             val adaptiveLayoutType = AdaptiveLayoutType.from(windowSizeClass)
 
             SmartStepTheme {
-                //SmartStepNavigation(adaptiveLayoutType)
-                HomeScreen(adaptiveLayoutType)
+                SmartStepNavigation(adaptiveLayoutType)
             }
         }
     }
