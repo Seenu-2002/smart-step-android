@@ -20,6 +20,14 @@ val Inter = FontFamily(
     Font(R.font.inter_bold, weight = FontWeight.Bold),
 )
 
+val Typography.title: TextStyle
+    get() = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 64.sp,
+        lineHeight = 70.sp
+    )
+
 val Typography.bodyLargeMedium: TextStyle
     get() = TextStyle(
         fontFamily = Inter,

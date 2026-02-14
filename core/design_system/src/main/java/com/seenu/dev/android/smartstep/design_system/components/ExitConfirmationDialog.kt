@@ -22,9 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.seenu.dev.android.core.design_system.R
+import com.seenu.dev.android.smartstep.design_system.theme.Inter
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.theme.bodyLargeMedium
@@ -60,6 +62,7 @@ fun ExitConfirmationDialog(
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.secondary,
                 textAlign = TextAlign.Center,
+                fontFamily = Inter
             )
 
             Button(
@@ -75,6 +78,7 @@ fun ExitConfirmationDialog(
                     text = stringResource(R.string.ok),
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.textWhite,
+                    fontFamily = Inter
                 )
             }
         }
@@ -87,6 +91,23 @@ fun DialogPreview() {
     SmartStepTheme {
         Column(
             Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            ExitConfirmationDialog()
+        }
+    }
+}
+
+@Preview(showBackground = true, device = Devices.TABLET)
+@Preview (showBackground = true)
+@Composable
+fun DialogScreenPreview() {
+    SmartStepTheme {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(12.dp),
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {

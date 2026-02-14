@@ -12,4 +12,8 @@
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
     <string name="dialog_exit_text">The app will fully close and will not run in t he background.</string>
+
+    <string name="current_steps">%,d</string>
+    <string name="target_steps">/%d step</string>
+
 </resources>
