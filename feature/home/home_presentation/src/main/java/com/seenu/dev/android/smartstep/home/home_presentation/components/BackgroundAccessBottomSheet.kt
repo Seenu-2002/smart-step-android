@@ -27,6 +27,7 @@ import com.seenu.dev.android.smartstep.home.home_presentation.R
 @Composable
 fun BackgroundAccessBottomSheet(
     showBottomSheet: Boolean,
+    onContinue: () -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -58,7 +59,7 @@ fun BackgroundAccessBottomSheet(
 
             SmartStepPrimaryButton(
                 buttonText = stringResource(R.string.lbl_continue),
-                onClick = {}
+                onClick = onContinue
             )
         }
     }
@@ -70,6 +71,7 @@ private fun BackgroundAccessBottomSheetPreview() {
     SmartStepTheme {
         BackgroundAccessBottomSheet(
             true,
+            {},
             {}
         )
     }

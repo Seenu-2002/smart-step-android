@@ -5,4 +5,6 @@ sealed interface HomeAction {
     object OnRequireActivityRecognitionPermission: HomeAction
     object RationaleRequired : HomeAction
     object OnPermissionUpdateRequired: HomeAction
+    object OnBackgroundAccessRecommendedDismiss: HomeAction
+    object OnBackgroundAccessRecommendedContinue: HomeAction
 }

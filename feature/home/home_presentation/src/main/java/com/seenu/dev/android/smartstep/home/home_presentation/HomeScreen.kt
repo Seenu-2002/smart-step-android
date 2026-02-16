@@ -44,6 +44,7 @@ import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
+import com.seenu.dev.android.smartstep.home.home_presentation.components.BackgroundAccessPermission
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionFirstDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.findActivity
@@ -95,10 +96,6 @@ fun HomeScreen(
                     "package:${context.packageName}".toUri()
                 )
                 context.startActivity(intent)
-            }
-
-            HomeEvent.OnFirstInstall -> {
-
             }
         }
     }
@@ -193,6 +190,14 @@ fun HomeScreenRoot(
                             }
                         }
                     }
+                }
+
+                if (uiState.showBackgroundAccessRecommended) {
+                    BackgroundAccessPermission(
+                        adaptiveLayoutType = adaptiveLayoutType,
+                        onContinue = { onAction(HomeAction.OnBackgroundAccessRecommendedContinue) },
+                        onDismissRequest = { onAction(HomeAction.OnBackgroundAccessRecommendedDismiss) }
+                    )
                 }
             }
         }

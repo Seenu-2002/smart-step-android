@@ -61,14 +61,28 @@ class HomeViewModel(
                     checkBackgroundPermission()
                 }
             }
+
+            HomeAction.OnBackgroundAccessRecommendedDismiss -> {
+                _uiState.update { it.copy(showBackgroundAccessRecommended = false) }
+                viewModelScope.launch {
+                    preferenceManager.markBackgroundPermissionRequired()
+                }
+            }
+
+            HomeAction.OnBackgroundAccessRecommendedContinue -> {
+                _uiState.update { it.copy(showBackgroundAccessRecommended = false) }
+                viewModelScope.launch {
+                    preferenceManager.markBackgroundPermissionRequired()
+                    eventChannel.send(HomeEvent.OnBackgroundPermissionRequired)
+                }
+            }
         }
     }
 
     private fun checkBackgroundPermission() {
         viewModelScope.launch {
             if (!preferenceManager.backgroundPermissionRequired.first()) {
-                preferenceManager.markBackgroundPermissionRequired()
-                eventChannel.send(HomeEvent.OnBackgroundPermissionRequired)
+                _uiState.update { it.copy(showBackgroundAccessRecommended = true) }
             }
         }
     }
