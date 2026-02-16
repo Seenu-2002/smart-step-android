@@ -11,14 +11,14 @@ import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
-import com.seenu.dev.android.smartstep.home.HomeScreen
+import com.seenu.dev.android.smartstep.home.home_presentation.HomeScreen
 import com.seenu.dev.android.smartstep.onboarding.ProfileSetupScreen
 
 @Composable
 fun SmartStepNavigation(
     adaptiveLayoutType: AdaptiveLayoutType
 ) {
-    val backstack = rememberNavBackStack(Route.ProfileSetupScreen)
+    val backstack = rememberNavBackStack(Route.StepCounterScreen)
     NavDisplay(
         backStack = backstack,
         modifier = Modifier.fillMaxSize(),

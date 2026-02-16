@@ -56,10 +56,17 @@ dependencies {
     // WindowSize
     implementation(libs.window.size)
 
+    // Koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+
     // Modules
     implementation(projects.core.designSystem)
     implementation(projects.core.data)
     implementation(projects.core.domain)
     implementation(projects.feature.onboarding)
-    implementation(projects.feature.home)
+
+    implementation(projects.feature.home.homePresentation)
+    implementation(projects.feature.home.homeDomain)
+    implementation(projects.feature.home.homeData)
 }
