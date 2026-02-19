@@ -62,6 +62,9 @@ val ColorScheme.backgroundWhite: Color
 val ColorScheme.backgroundWhite20: Color
     get() = BackgroundWhite20
 
+val ColorScheme.strokeMain: Color
+    get() = StrokeMainBorder
+
 @Composable
 fun SmartStepTheme(content: @Composable () -> Unit) {
     MaterialTheme(
