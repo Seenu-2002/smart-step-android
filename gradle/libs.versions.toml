@@ -17,6 +17,8 @@ timber = "5.0.1"
 roomRuntime = "2.8.4"
 splash = "1.2.0"
 nav3Core = "1.1.0-alpha01"
+datastorePreferences = "1.2.0"
+kotlinxCoroutines = "1.10.2"
 
 # Project versions
 projectApplicationId = "com.seenu.dev.android.smartstep"
@@ -25,6 +27,8 @@ projectMinSdkVersion = "24"
 projectTargetSdkVersion = "36"
 projectCompileSdkVersion = "36"
 projectVersionCode = "1"
+lifecycleViewmodelKtx = "2.10.0"
+datastoreCore = "1.2.0"
 
 [libraries]
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -46,6 +50,7 @@ core-splashscreen = { group = "androidx.core", name = "core-splashscreen", versi
 androidx-room-ktx = { module = "androidx.room:room-ktx", version.ref = "roomRuntime" }
 androidx-room-compiler = { module = "androidx.room:room-compiler", version.ref = "roomRuntime" }
 androidx-room-runtime = { module = "androidx.room:room-runtime", version.ref = "roomRuntime" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
@@ -53,6 +58,7 @@ koin-annotation-compiler = { module = "io.insert-koin:koin-ksp-compiler", versio
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 window-size = { module = "androidx.compose.material3:material3-window-size-class" }
+androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 
 # Dependencies shared across multiple subprojects
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -62,6 +68,9 @@ androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = 
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "roomRuntime" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutines" }
+androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
+androidx-datastore-core = { group = "androidx.datastore", name = "datastore-core", version.ref = "datastoreCore" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

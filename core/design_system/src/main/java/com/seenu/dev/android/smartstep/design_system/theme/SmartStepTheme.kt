@@ -36,6 +36,14 @@ val Typography.bodyLargeMedium: TextStyle
         lineHeight = 24.sp
     )
 
+val Typography.bodyLargeRegular: TextStyle
+    get() = TextStyle(
+        fontFamily = Inter,
+        fontWeight = FontWeight.Normal,
+        fontSize = 16.sp,
+        lineHeight = 24.sp
+    )
+
 val Typography.bodyMediumMedium: TextStyle
     get() = TextStyle(
         fontFamily = Inter,
@@ -64,6 +72,9 @@ val ColorScheme.backgroundWhite20: Color
 
 val ColorScheme.strokeMain: Color
     get() = StrokeMainBorder
+
+val ColorScheme.bottomSheetImageBorder: Color
+    get() = BottomSheetImageBorder
 
 @Composable
 fun SmartStepTheme(content: @Composable () -> Unit) {
