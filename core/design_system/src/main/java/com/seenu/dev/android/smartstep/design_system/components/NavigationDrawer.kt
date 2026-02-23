@@ -1,4 +1,4 @@
-package com.seenu.dev.android.smartstep.navigation
+package com.seenu.dev.android.smartstep.design_system.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
