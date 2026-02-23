@@ -9,4 +9,6 @@ android {
 dependencies {
     implementation(libs.timber)
     implementation(libs.bundles.koin)
+
+    implementation(project(":core:domain"))
 }
