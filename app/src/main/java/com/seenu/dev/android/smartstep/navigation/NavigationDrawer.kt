@@ -25,6 +25,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.seenu.dev.android.core.design_system.R
@@ -50,19 +51,19 @@ fun SmartStepDrawerContent(
                 .padding(16.dp)
         ) {
             DrawerItem(
-                text = "Fix the “Stop Counting Steps” issue",
+                text = stringResource(R.string.fix_the_stop_counting_steps_issue),
                 onClick = onFixIssueClick,
             )
             DrawerItem(
-                text = "Step Goal",
+                text = stringResource(R.string.step_goal),
                 onClick = onStepGoalClick,
             )
             DrawerItem(
-                text = "Personal Settings",
+                text = stringResource(R.string.personal_settings),
                 onClick = onSettingsClick,
             )
             DrawerItem(
-                text = "Exit",
+                text = stringResource(R.string.exit),
                 onClick = onExitClick,
                 textColor = MaterialTheme.colorScheme.primary,
                 borderColor = Color.Transparent
@@ -71,7 +72,7 @@ fun SmartStepDrawerContent(
     }
 }
 
-// todo: better to move this to dimens.xml
+// move this to dimens.xml?
 private val DrawerItemHeight = 56.dp
 private val DrawerItemStrokeWidth = 1.dp
 

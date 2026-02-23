@@ -16,4 +16,10 @@
     <string name="current_steps">%,d</string>
     <string name="target_steps">/%d step</string>
 
+    <!--  navigation_drawer area  -->
+    <string name="fix_the_stop_counting_steps_issue">Fix the “Stop Counting Steps” issue</string>
+    <string name="step_goal">Step Goal</string>
+    <string name="personal_settings">Personal Settings</string>
+    <string name="exit">Exit</string>
+
 </resources>
