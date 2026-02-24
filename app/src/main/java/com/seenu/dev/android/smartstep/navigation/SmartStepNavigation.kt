@@ -41,6 +41,7 @@ fun SmartStepNavigation(
                     NavEntry(key) {
                         HomeScreen(
                             adaptiveLayoutType = adaptiveLayoutType,
+                            onNavigatePersonalSettingsClick = {}
                         )
                     }
                 }
