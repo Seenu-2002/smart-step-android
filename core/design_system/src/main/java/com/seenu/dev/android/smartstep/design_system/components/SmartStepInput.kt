@@ -190,6 +190,7 @@ fun SmartStepDropdown(
                     Text(
                         text = option,
                         style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.weight(1F)
                     )
 
                     if (isSelected) {

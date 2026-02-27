@@ -65,7 +65,7 @@ dependencies {
     implementation(projects.core.designSystem)
     implementation(projects.core.data)
     implementation(projects.core.domain)
-    implementation(projects.feature.onboarding)
+    implementation(projects.feature.profileSetup)
 
     implementation(projects.feature.home.homePresentation)
     implementation(projects.feature.home.homeDomain)
