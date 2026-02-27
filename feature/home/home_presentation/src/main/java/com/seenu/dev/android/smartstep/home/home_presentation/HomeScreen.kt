@@ -16,15 +16,18 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -40,16 +43,19 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigationDrawer
 import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.components.BackgroundAccessPermission
+import com.seenu.dev.android.smartstep.home.home_presentation.components.ObserveOnResume
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionFirstDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.findActivity
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.openAppSettings
 import com.seenu.dev.android.smartstep.home.home_presentation.utils.ObserveAsEvents
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @SuppressLint("InlinedApi", "UseKtx", "BatteryLife")
@@ -58,7 +64,7 @@ import org.koin.androidx.compose.koinViewModel
 fun HomeScreen(
     adaptiveLayoutType: AdaptiveLayoutType,
     modifier: Modifier = Modifier,
-    onMenuClick: () -> Unit = {},
+    onNavigatePersonalSettingsClick: () -> Unit,
     homeViewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState = homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -68,7 +74,7 @@ fun HomeScreen(
     // Safely find the Activity from the context
     val activity = remember(context) { context.findActivity() }
 
-    val launcher = rememberLauncherForActivityResult(
+    val activityRecognitionLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.RequestPermission()
     ) { granted ->
         homeViewModel.onAction(HomeAction.OnActivityRecognitionPermissionUpdate(granted))
@@ -87,7 +93,7 @@ fun HomeScreen(
                 if (rationaleRequired) {
                     homeViewModel.onAction(HomeAction.RationaleRequired)
                 }
-                launcher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
+                activityRecognitionLauncher.launch(Manifest.permission.ACTIVITY_RECOGNITION)
             }
 
             HomeEvent.OnBackgroundPermissionRequired -> {
@@ -107,11 +113,15 @@ fun HomeScreen(
         }
     }
 
+    ObserveOnResume(onResume = {
+        homeViewModel.onAction(HomeAction.CheckIsIgnoringBatteryOptimizations)
+    })
+
     HomeScreenRoot(
         adaptiveLayoutType = adaptiveLayoutType,
         uiState = uiState.value,
         onAction = homeViewModel::onAction,
-        onMenuClick = onMenuClick,
+        onNavigatePersonalSettingsClick = onNavigatePersonalSettingsClick,
         modifier = modifier,
     )
 }
@@ -122,87 +132,111 @@ fun HomeScreenRoot(
     adaptiveLayoutType: AdaptiveLayoutType,
     uiState: HomeState,
     onAction: (HomeAction) -> Unit,
+    onNavigatePersonalSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
-    onMenuClick: () -> Unit = {},
 ) {
-    Scaffold(
-        modifier = Modifier.fillMaxSize(),
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = {
-                    Text(
-                        text = stringResource(R.string.smart_step),
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                },
-                navigationIcon = {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(com.seenu.dev.android.core.design_system.R.drawable.ic_menu),
-                        contentDescription = "Menu",
-                        modifier = Modifier
-                            .clickable(
-                                interactionSource = null,
-                                indication = null,
-                                onClick = onMenuClick
-                            )
-                            .padding(start = 16.dp)
-                    )
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface
-                )
-            )
-        },
-        containerColor = MaterialTheme.colorScheme.backgroundSecondary
-    ) { innerPadding ->
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val scope = rememberCoroutineScope()
 
-        val context = LocalContext.current
-        
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
+    SmartStepNavigationDrawer(
+        showFixIssueItem = !uiState.isIgnoringBatteryOptimizations,
+        onFixIssueClick = {
+            scope.launch { drawerState.close() }
+            onAction(HomeAction.OnFixStopCountingStepIssueClick)
+        },
+        onStepGoalClick = {},
+        onPersonalSettingsClick = {
+            scope.launch { drawerState.close() }
+            onNavigatePersonalSettingsClick()
+        },
+        onExitClick = {},
+        drawerState = drawerState
+    ) {
+        Scaffold(
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
+                CenterAlignedTopAppBar(
+                    title = {
+                        Text(
+                            text = stringResource(R.string.smart_step),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                    },
+                    navigationIcon = {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(com.seenu.dev.android.core.design_system.R.drawable.ic_menu),
+                            contentDescription = "Menu",
+                            modifier = Modifier
+                                .clickable(
+                                    interactionSource = null,
+                                    indication = null,
+                                    onClick = {
+                                        scope.launch {
+                                            drawerState.apply {
+                                                if (isClosed) open() else close()
+                                            }
+                                        }
+                                    }
+                                )
+                                .padding(start = 16.dp)
+                        )
+                    },
+                    colors = TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface
+                    )
+                )
+            },
+            containerColor = MaterialTheme.colorScheme.backgroundSecondary
+        ) { innerPadding ->
+
+            val context = LocalContext.current
+
+            Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .widthIn(max = if (adaptiveLayoutType.isWide) 394.dp else Dp.Unspecified)
-                    .padding(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                    .fillMaxSize()
+                    .padding(innerPadding),
+                contentAlignment = Alignment.Center
             ) {
-                if (uiState.activityRecognitionPermissionGranted) {
-                    StepCounterCard(2000, 10000)
-                } else {
-                    uiState.permissionDenialStep?.let {
-                        when (uiState.permissionDenialStep) {
-                            DenialStep.FIRST_DENIAL -> {
-                                PermissionFirstDenial(
-                                    adaptiveLayoutType = adaptiveLayoutType,
-                                    onAllowAccessClick = { onAction(HomeAction.OnRequireActivityRecognitionPermission) }
-                                )
-                            }
-                            DenialStep.SECOND_DENIAL -> {
-                                PermissionSecondDenial(
-                                    adaptiveLayoutType = adaptiveLayoutType,
-                                    onOpenSettings = { context.openAppSettings() },
-                                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .widthIn(max = if (adaptiveLayoutType.isWide) 394.dp else Dp.Unspecified)
+                        .padding(16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (uiState.activityRecognitionPermissionGranted) {
+                        StepCounterCard(2000, 10000)
+                    } else {
+                        uiState.permissionDenialStep?.let {
+                            when (uiState.permissionDenialStep) {
+                                DenialStep.FIRST_DENIAL -> {
+                                    PermissionFirstDenial(
+                                        adaptiveLayoutType = adaptiveLayoutType,
+                                        onAllowAccessClick = { onAction(HomeAction.OnRequireActivityRecognitionPermission) }
+                                    )
+                                }
+                                DenialStep.SECOND_DENIAL -> {
+                                    PermissionSecondDenial(
+                                        adaptiveLayoutType = adaptiveLayoutType,
+                                        onOpenSettings = { context.openAppSettings() },
+                                    )
+                                }
                             }
                         }
                     }
-                }
 
-                if (uiState.showBackgroundAccessRecommended) {
-                    BackgroundAccessPermission(
-                        adaptiveLayoutType = adaptiveLayoutType,
-                        onContinue = { onAction(HomeAction.OnBackgroundAccessRecommendedContinue) },
-                        onDismissRequest = { onAction(HomeAction.OnBackgroundAccessRecommendedDismiss) }
-                    )
+                    if (uiState.showBackgroundAccessRecommended) {
+                        BackgroundAccessPermission(
+                            adaptiveLayoutType = adaptiveLayoutType,
+                            onContinue = { onAction(HomeAction.OnBackgroundAccessRecommendedContinue) },
+                            onDismissRequest = { onAction(HomeAction.OnBackgroundAccessRecommendedDismiss) }
+                        )
+                    }
                 }
             }
         }
-
     }
+
 }
 
 @Preview(name = "Mobile", widthDp = 600)
@@ -212,6 +246,7 @@ fun MyScreenMobilePreview() {
         HomeScreenRoot(
             AdaptiveLayoutType.Mobile,
             uiState = HomeState(isFirstInstall = true),
+            onNavigatePersonalSettingsClick = {},
             onAction = {}
         )
     }
@@ -224,6 +259,7 @@ fun MyScreenWidePreview() {
         HomeScreenRoot(
             AdaptiveLayoutType.Tablet,
             uiState = HomeState(),
+            onNavigatePersonalSettingsClick = {},
             onAction = {}
         )
     }

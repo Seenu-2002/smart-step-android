@@ -7,4 +7,6 @@ sealed interface HomeAction {
     object OnPermissionUpdateRequired: HomeAction
     object OnBackgroundAccessRecommendedDismiss: HomeAction
     object OnBackgroundAccessRecommendedContinue: HomeAction
+    object CheckIsIgnoringBatteryOptimizations: HomeAction
+    object OnFixStopCountingStepIssueClick: HomeAction
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -36,11 +37,40 @@ import com.seenu.dev.android.smartstep.design_system.theme.strokeMain
 import kotlinx.coroutines.launch
 
 @Composable
-fun SmartStepDrawerContent(
+fun SmartStepNavigationDrawer(
+    showFixIssueItem: Boolean,
     onFixIssueClick: () -> Unit,
     onStepGoalClick: () -> Unit,
-    onSettingsClick: () -> Unit,
-    onExitClick: () -> Unit
+    onPersonalSettingsClick: () -> Unit,
+    onExitClick: () -> Unit,
+    drawerState: DrawerState,
+    modifier: Modifier = Modifier,
+    scaffoldContent: @Composable () -> Unit
+) {
+    ModalNavigationDrawer(
+        drawerContent = {
+            SmartStepDrawerContent(
+                showFixIssueItem = showFixIssueItem,
+                onFixIssueClick = onFixIssueClick,
+                onStepGoalClick = onStepGoalClick,
+                onPersonalSettingsClick = onPersonalSettingsClick,
+                onExitClick = onExitClick,
+            )
+        },
+        drawerState = drawerState
+    ) {
+        scaffoldContent()
+    }
+}
+
+@Composable
+fun SmartStepDrawerContent(
+    showFixIssueItem: Boolean,
+    onFixIssueClick: () -> Unit,
+    onStepGoalClick: () -> Unit,
+    onPersonalSettingsClick: () -> Unit,
+    onExitClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     ModalDrawerSheet {
         Column(
@@ -50,17 +80,19 @@ fun SmartStepDrawerContent(
                 .background(MaterialTheme.colorScheme.backgroundSecondary)
                 .padding(16.dp)
         ) {
-            DrawerItem(
-                text = stringResource(R.string.fix_the_stop_counting_steps_issue),
-                onClick = onFixIssueClick,
-            )
+            if (showFixIssueItem) {
+                DrawerItem(
+                    text = stringResource(R.string.fix_the_stop_counting_steps_issue),
+                    onClick = onFixIssueClick,
+                )
+            }
             DrawerItem(
                 text = stringResource(R.string.step_goal),
                 onClick = onStepGoalClick,
             )
             DrawerItem(
                 text = stringResource(R.string.personal_settings),
-                onClick = onSettingsClick,
+                onClick = onPersonalSettingsClick,
             )
             DrawerItem(
                 text = stringResource(R.string.exit),
@@ -124,9 +156,10 @@ fun SmartStepDrawerOpenPreview() {
             drawerState = drawerState,
             drawerContent = {
                 SmartStepDrawerContent(
+                    showFixIssueItem = true,
                     onFixIssueClick = {},
                     onStepGoalClick = {},
-                    onSettingsClick = {},
+                    onPersonalSettingsClick = {},
                     onExitClick = {
                         scope.launch {
                             drawerState.close()
