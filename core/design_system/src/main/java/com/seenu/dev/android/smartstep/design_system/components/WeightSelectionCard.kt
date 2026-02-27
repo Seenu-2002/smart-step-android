@@ -2,7 +2,6 @@ package com.seenu.dev.android.smartstep.design_system.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +18,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -33,7 +33,6 @@ import androidx.compose.ui.unit.dp
 import com.seenu.dev.android.core.design_system.R
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
-import com.seenu.dev.android.smartstep.design_system.theme.backgroundTertiary
 import com.seenu.dev.android.smartstep.design_system.theme.bodyLargeMedium
 import com.seenu.dev.android.smartstep.design_system.theme.bodyMediumMedium
 import com.seenu.dev.android.smartstep.design_system.theme.buttonSecondary
@@ -41,43 +40,51 @@ import kotlin.math.roundToInt
 
 @Preview
 @Composable
-private fun HeightSelectionCard_PreviewCms() {
+private fun WeightSelectionCard_PreviewKgs() {
     SmartStepTheme {
-        var selectedMetric: HeightMetricUiModel by remember {
-            mutableStateOf(HeightMetricUiModel.Centimeters(175))
+        var selectedMetric by remember {
+            mutableStateOf<WeightMetricUiModel>(WeightMetricUiModel.Kilograms(70))
         }
-        HeightSelectionCard(
+        WeightSelectionCard(
             selectedMetric = selectedMetric,
-            onMetricTypeChange = { selectedMetric = it },
-            onMetricChange = { selectedMetric = it }
+            onMetricTypeChange = {
+                selectedMetric = it
+            },
+            onMetricChange = {
+                selectedMetric = it
+            },
         )
     }
 }
 
 @Preview
 @Composable
-private fun HeightSelectionCard_PreviewFtIn() {
+private fun WeightSelectionCard_PreviewLbs() {
     SmartStepTheme {
-        var selectedMetric: HeightMetricUiModel by remember {
-            mutableStateOf(HeightMetricUiModel.FeetInches(5, 8))
+        var selectedMetric by remember {
+            mutableStateOf<WeightMetricUiModel>(WeightMetricUiModel.Pounds(170))
         }
-        HeightSelectionCard(
+        WeightSelectionCard(
             selectedMetric = selectedMetric,
-            onMetricTypeChange = { selectedMetric = it },
-            onMetricChange = { selectedMetric = it }
+            onMetricTypeChange = {
+                selectedMetric = it
+            },
+            onMetricChange = {
+                selectedMetric = it
+            },
         )
     }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HeightSelectionCard(
-    selectedMetric: HeightMetricUiModel,
-    onMetricTypeChange: (HeightMetricUiModel) -> Unit,
-    onMetricChange: (HeightMetricUiModel) -> Unit,
+fun WeightSelectionCard(
+    selectedMetric: WeightMetricUiModel,
+    onMetricTypeChange: (WeightMetricUiModel) -> Unit,
+    onMetricChange: (WeightMetricUiModel) -> Unit,
     modifier: Modifier = Modifier,
     onOk: () -> Unit = {},
-    onDismissRequest: () -> Unit = {},
+    onDismissRequest: () -> Unit = {}
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
         Column(
@@ -89,7 +96,7 @@ fun HeightSelectionCard(
         ) {
             Text(
                 text = stringResource(
-                    R.string.height,
+                    R.string.weight,
                 ),
                 style = MaterialTheme.typography.titleMedium,
                 modifier = Modifier
@@ -110,9 +117,9 @@ fun HeightSelectionCard(
                     .padding(horizontal = 24.dp)
             ) {
                 SegmentedButton(
-                    selected = selectedMetric is HeightMetricUiModel.Centimeters, onClick = {
-                        if (selectedMetric is HeightMetricUiModel.FeetInches) {
-                            onMetricTypeChange(selectedMetric.toCentimeters())
+                    selected = selectedMetric is WeightMetricUiModel.Kilograms, onClick = {
+                        if (selectedMetric is WeightMetricUiModel.Pounds) {
+                            onMetricTypeChange(selectedMetric.toKilograms())
                         }
                     }, colors = SegmentedButtonDefaults.colors(
                         activeContainerColor = MaterialTheme.colorScheme.buttonSecondary,
@@ -125,14 +132,14 @@ fun HeightSelectionCard(
                     )
                 ) {
                     Text(
-                        text = stringResource(R.string.unit_cm),
+                        text = stringResource(R.string.unit_kg),
                         style = MaterialTheme.typography.bodyMediumMedium
                     )
                 }
                 SegmentedButton(
-                    selected = selectedMetric is HeightMetricUiModel.FeetInches, onClick = {
-                        if (selectedMetric is HeightMetricUiModel.Centimeters) {
-                            onMetricTypeChange(selectedMetric.toFeetInches())
+                    selected = selectedMetric is WeightMetricUiModel.Pounds, onClick = {
+                        if (selectedMetric is WeightMetricUiModel.Kilograms) {
+                            onMetricTypeChange(selectedMetric.toPounds())
                         }
                     }, colors = SegmentedButtonDefaults.colors(
                         activeContainerColor = MaterialTheme.colorScheme.buttonSecondary,
@@ -145,13 +152,13 @@ fun HeightSelectionCard(
                     )
                 ) {
                     Text(
-                        text = stringResource(R.string.unit_ft_inches),
+                        text = stringResource(R.string.unit_lbs),
                         style = MaterialTheme.typography.bodyMediumMedium
                     )
                 }
             }
             Spacer(modifier = Modifier.height(24.dp))
-            HeightMetricValueContainer(
+            WeightMetricValueContainer(
                 metric = selectedMetric,
                 onMetricChange = onMetricChange,
                 modifier = Modifier.fillMaxWidth()
@@ -192,123 +199,60 @@ fun HeightSelectionCard(
 }
 
 @Stable
-sealed interface HeightMetricUiModel {
-    data class Centimeters(val value: Int) : HeightMetricUiModel {
-        fun toFeetInches(): FeetInches {
-            val totalInches = (value / 2.54).roundToInt()
-            val feet = totalInches / 12
-            val inches = totalInches % 12
-            return FeetInches(feet, inches)
+sealed interface WeightMetricUiModel {
+    data class Kilograms(val weight: Int) : WeightMetricUiModel {
+        fun toPounds(): Pounds {
+            return Pounds((weight * 2.20462).roundToInt())
         }
     }
 
-    data class FeetInches(val feet: Int, val inches: Int) : HeightMetricUiModel {
-        fun toCentimeters(): Centimeters {
-            val totalInches = (feet * 12) + inches
-            val centimeters = (totalInches * 2.54).roundToInt()
-            return Centimeters(centimeters)
+    data class Pounds(val weight: Int) : WeightMetricUiModel {
+        fun toKilograms(): Kilograms {
+            return Kilograms((weight / 2.20462).roundToInt())
         }
     }
 }
 
 @Composable
-fun HeightMetricValueContainer(
-    metric: HeightMetricUiModel,
-    onMetricChange: (HeightMetricUiModel) -> Unit,
+fun WeightMetricValueContainer(
+    metric: WeightMetricUiModel,
+    onMetricChange: (WeightMetricUiModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (metric is HeightMetricUiModel.Centimeters) {
-        ScrollableHapticContainer(
-            options = (140..328).map { it.toString() },
-            visibleCount = 5,
-            activeIndex = metric.value - 140,
-            onActiveIndexChange = {
-                onMetricChange(HeightMetricUiModel.Centimeters(value = it + 140))
-            },
-            itemHeight = 40.dp,
-            modifier = modifier,
-            content = { text, isSelected ->
-                Text(
-                    text = text,
-                    style = MaterialTheme.typography.titleMedium,
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
-                )
+    val options = remember(metric) {
+        if (metric is WeightMetricUiModel.Kilograms) {
+            (30..200)
+        } else {
+            (66..440)
+        }
+    }.map { it.toString() }
+    val activeIndex = remember(metric) {
+        options.indexOf(
+            when (metric) {
+                is WeightMetricUiModel.Kilograms -> metric.weight.toString()
+                is WeightMetricUiModel.Pounds -> metric.weight.toString()
             }
         )
-    } else if (metric is HeightMetricUiModel.FeetInches) {
-        Row(modifier = modifier) {
-            ScrollableHapticContainer(
-                options = (1..10).map { it.toString() },
-                visibleCount = 5,
-                activeIndex = metric.feet - 1,
-                onActiveIndexChange = {
-                    onMetricChange(
-                        metric.copy(
-                            feet = it + 1
-                        )
-                    )
-                },
-                itemHeight = 40.dp,
-                modifier = Modifier.weight(1F),
-                content = { text, isSelected ->
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
-                    )
-                },
-                selectedBox = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = 40.dp)
-                            .background(color = MaterialTheme.colorScheme.backgroundTertiary)
-                            .padding(end = 12.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Text(
-                            text = stringResource(R.string.unit_ft),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
-            )
-            ScrollableHapticContainer(
-                options = (0..9).map { it.toString() },
-                visibleCount = 5,
-                activeIndex = metric.inches,
-                onActiveIndexChange = {
-                    onMetricChange(
-                        metric.copy(
-                            inches = it
-                        )
-                    )
-                },
-                itemHeight = 40.dp,
-                modifier = Modifier.weight(1F),
-                content = { text, isSelected ->
-                    Text(
-                        text = text,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
-                    )
-                },
-                selectedBox = {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(height = 40.dp)
-                            .background(color = MaterialTheme.colorScheme.backgroundTertiary)
-                            .padding(end = 24.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        Text(
-                            text = stringResource(R.string.unit_inches),
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                    }
-                }
+    }
+    ScrollableHapticContainer(
+        options = options,
+        visibleCount = 5,
+        activeIndex = activeIndex,
+        onActiveIndexChange = {
+            val weight = options[it].toIntOrNull() ?: return@ScrollableHapticContainer
+            when (metric) {
+                is WeightMetricUiModel.Kilograms -> onMetricChange(WeightMetricUiModel.Kilograms(weight))
+                is WeightMetricUiModel.Pounds -> onMetricChange(WeightMetricUiModel.Pounds(weight))
+            }
+        },
+        itemHeight = 40.dp,
+        modifier = modifier,
+        content = { text, isSelected ->
+            Text(
+                text = text,
+                style = MaterialTheme.typography.titleMedium,
+                color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondary
             )
         }
-    }
+    )
 }

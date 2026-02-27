@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.smartstep.android.library.compose)
+    alias(libs.plugins.smartstep.android.feature.ui)
 }
 
 android {

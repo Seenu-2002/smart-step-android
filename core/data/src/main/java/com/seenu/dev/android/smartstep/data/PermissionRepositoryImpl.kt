@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.core.content.ContextCompat
-import com.seenu.dev.android.smartstep.domain.PermissionRepository
+import com.seenu.dev.android.smartstep.domain.repository.PermissionRepository
 
 class PermissionRepositoryImpl(private val context: Context) : PermissionRepository {
     override fun hasActivityRecognitionPermission(): Boolean {

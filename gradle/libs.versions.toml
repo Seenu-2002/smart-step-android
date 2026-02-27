@@ -19,6 +19,7 @@ splash = "1.2.0"
 nav3Core = "1.1.0-alpha01"
 datastorePreferences = "1.2.0"
 kotlinxCoroutines = "1.10.2"
+kotlinxSerialization = "1.10.0"
 
 # Project versions
 projectApplicationId = "com.seenu.dev.android.smartstep"
@@ -59,6 +60,7 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 window-size = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 # Dependencies shared across multiple subprojects
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

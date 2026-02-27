@@ -2,7 +2,7 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seenu.dev.android.smartstep.domain.PermissionRepository
+import com.seenu.dev.android.smartstep.domain.repository.PermissionRepository
 import com.seenu.dev.android.smartstep.home.home_domain.BatteryOptimizationRepository
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
 import kotlinx.coroutines.channels.Channel

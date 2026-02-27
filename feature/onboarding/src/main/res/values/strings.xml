@@ -5,4 +5,7 @@
     <string name="skip">Skip</string>
     <string name="information_msg">This information helps calculate your activity more accurately.</string>
     <string name="start">Start</string>
+    <string name="gender">Gender</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
 </resources>

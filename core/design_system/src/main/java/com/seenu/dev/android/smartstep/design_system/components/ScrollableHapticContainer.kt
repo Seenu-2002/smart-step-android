@@ -137,7 +137,7 @@ fun ScrollableHapticContainer(
             items(noOfEmptySpaces) {
                 Box(modifier = Modifier.height(itemHeight))
             }
-            items(options.size, key = { index -> options[index] }) { index ->
+            items(options.size) { index ->
                 Box(
                     modifier = Modifier
                         .height(itemHeight)
