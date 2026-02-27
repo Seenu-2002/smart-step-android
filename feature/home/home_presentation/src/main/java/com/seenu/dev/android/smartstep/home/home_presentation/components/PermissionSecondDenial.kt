@@ -8,6 +8,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.BasicAlertDialog
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.seenu.dev.android.smartstep.design_system.components.SmartStepBottomSheet
+import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -17,19 +26,53 @@ fun PermissionSecondDenial(
     modifier: Modifier = Modifier,
     dismissable: Boolean = false
 ) {
+    var showDialog by remember { mutableStateOf(true) }
+    var showRequestPermission by remember { mutableStateOf(true) }
+
     when (adaptiveLayoutType) {
         AdaptiveLayoutType.Mobile -> {
-            var showBottomSheet by remember { mutableStateOf(true) }
-
-            ManualPermissionBottomSheet(
-                showBottomSheet = showBottomSheet,
-                onOpenSettings = onOpenSettings,
-                onDismissRequest = { showBottomSheet = !showBottomSheet || !dismissable}
-            )
+            SmartStepBottomSheet(
+                showBottomSheet = showRequestPermission,
+                onDismissRequest = { showRequestPermission = !showRequestPermission || !dismissable },
+                dragHandle = null,
+                modifier = modifier
+            ) {
+                ManualPermissionContent(onOpenSettings = onOpenSettings)
+            }
         }
 
         AdaptiveLayoutType.Tablet -> {
+            if (showDialog) {
+                BasicAlertDialog(
+                    onDismissRequest = { showRequestPermission = !showRequestPermission || !dismissable },
+                    modifier = modifier
+                ) {
+                    ManualPermissionContent(
+                        onOpenSettings = onOpenSettings,
+                        modifier = Modifier.background(
+                            color = MaterialTheme.colorScheme.surface,
+                            shape = MaterialTheme.shapes.large
+                        )
+                    )
+                }
+            }
+        }
+    }
+}
 
+@Preview(name = "Mobile w400", widthDp = 400, showBackground = true)
+@Preview(name = "Tablet w1000", widthDp = 1000, showBackground = true)
+@Composable
+private fun PermissionSecondDenialPreview() {
+    SmartStepTheme {
+        BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
+            val isTablet = maxWidth >= 600.dp
+            val adaptiveLayoutType = if (isTablet) AdaptiveLayoutType.Tablet else AdaptiveLayoutType.Mobile
+
+            PermissionSecondDenial(
+                adaptiveLayoutType = adaptiveLayoutType,
+                onOpenSettings = {}
+            )
         }
     }
 }
