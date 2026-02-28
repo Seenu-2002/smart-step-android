@@ -1,6 +1,7 @@
 package com.seenu.dev.android.smartstep.design_system.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -35,13 +37,14 @@ import com.seenu.dev.android.smartstep.design_system.theme.backgroundTertiary
 import com.seenu.dev.android.smartstep.design_system.theme.bodyLargeMedium
 import com.seenu.dev.android.smartstep.design_system.theme.bodyMediumMedium
 import com.seenu.dev.android.smartstep.design_system.theme.buttonSecondary
+import kotlin.math.roundToInt
 
 @Preview
 @Composable
 private fun HeightSelectionCard_PreviewCms() {
     SmartStepTheme {
-        var selectedMetric: HeightMetric by remember {
-            mutableStateOf(HeightMetric.Centimeters(175))
+        var selectedMetric: HeightMetricUiModel by remember {
+            mutableStateOf(HeightMetricUiModel.Centimeters(175))
         }
         HeightSelectionCard(
             selectedMetric = selectedMetric,
@@ -55,8 +58,8 @@ private fun HeightSelectionCard_PreviewCms() {
 @Composable
 private fun HeightSelectionCard_PreviewFtIn() {
     SmartStepTheme {
-        var selectedMetric: HeightMetric by remember {
-            mutableStateOf(HeightMetric.FeetInches(5, 8))
+        var selectedMetric: HeightMetricUiModel by remember {
+            mutableStateOf(HeightMetricUiModel.FeetInches(5, 8))
         }
         HeightSelectionCard(
             selectedMetric = selectedMetric,
@@ -69,10 +72,11 @@ private fun HeightSelectionCard_PreviewFtIn() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HeightSelectionCard(
-    selectedMetric: HeightMetric,
-    onMetricTypeChange: (HeightMetric) -> Unit,
-    onMetricChange: (HeightMetric) -> Unit,
+    selectedMetric: HeightMetricUiModel,
+    onMetricTypeChange: (HeightMetricUiModel) -> Unit,
+    onMetricChange: (HeightMetricUiModel) -> Unit,
     modifier: Modifier = Modifier,
+    onOk: () -> Unit = {},
     onDismissRequest: () -> Unit = {},
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
@@ -106,8 +110,8 @@ fun HeightSelectionCard(
                     .padding(horizontal = 24.dp)
             ) {
                 SegmentedButton(
-                    selected = selectedMetric is HeightMetric.Centimeters, onClick = {
-                        if (selectedMetric is HeightMetric.FeetInches) {
+                    selected = selectedMetric is HeightMetricUiModel.Centimeters, onClick = {
+                        if (selectedMetric is HeightMetricUiModel.FeetInches) {
                             onMetricTypeChange(selectedMetric.toCentimeters())
                         }
                     }, colors = SegmentedButtonDefaults.colors(
@@ -126,8 +130,8 @@ fun HeightSelectionCard(
                     )
                 }
                 SegmentedButton(
-                    selected = selectedMetric is HeightMetric.FeetInches, onClick = {
-                        if (selectedMetric is HeightMetric.Centimeters) {
+                    selected = selectedMetric is HeightMetricUiModel.FeetInches, onClick = {
+                        if (selectedMetric is HeightMetricUiModel.Centimeters) {
                             onMetricTypeChange(selectedMetric.toFeetInches())
                         }
                     }, colors = SegmentedButtonDefaults.colors(
@@ -163,18 +167,24 @@ fun HeightSelectionCard(
                     text = stringResource(R.string.cancel),
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(
-                        10.dp
-                    )
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable(onClick = onDismissRequest)
+                        .padding(
+                            10.dp
+                        )
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = stringResource(R.string.ok),
                     style = MaterialTheme.typography.bodyLargeMedium,
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(
-                        10.dp
-                    )
+                    modifier = Modifier
+                        .clip(MaterialTheme.shapes.medium)
+                        .clickable(onClick = onOk)
+                        .padding(
+                            10.dp
+                        )
                 )
             }
         }
@@ -182,20 +192,20 @@ fun HeightSelectionCard(
 }
 
 @Stable
-sealed interface HeightMetric {
-    data class Centimeters(val value: Int) : HeightMetric {
+sealed interface HeightMetricUiModel {
+    data class Centimeters(val value: Int) : HeightMetricUiModel {
         fun toFeetInches(): FeetInches {
-            val totalInches = (value / 2.54).toInt()
+            val totalInches = (value / 2.54).roundToInt()
             val feet = totalInches / 12
             val inches = totalInches % 12
             return FeetInches(feet, inches)
         }
     }
 
-    data class FeetInches(val feet: Int, val inches: Int) : HeightMetric {
+    data class FeetInches(val feet: Int, val inches: Int) : HeightMetricUiModel {
         fun toCentimeters(): Centimeters {
             val totalInches = (feet * 12) + inches
-            val centimeters = (totalInches * 2.54).toInt()
+            val centimeters = (totalInches * 2.54).roundToInt()
             return Centimeters(centimeters)
         }
     }
@@ -203,17 +213,17 @@ sealed interface HeightMetric {
 
 @Composable
 fun HeightMetricValueContainer(
-    metric: HeightMetric,
-    onMetricChange: (HeightMetric) -> Unit,
+    metric: HeightMetricUiModel,
+    onMetricChange: (HeightMetricUiModel) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (metric is HeightMetric.Centimeters) {
+    if (metric is HeightMetricUiModel.Centimeters) {
         ScrollableHapticContainer(
-            options = (140..200).map { it.toString() },
+            options = (140..328).map { it.toString() },
             visibleCount = 5,
             activeIndex = metric.value - 140,
             onActiveIndexChange = {
-                onMetricChange(HeightMetric.Centimeters(value = it + 140))
+                onMetricChange(HeightMetricUiModel.Centimeters(value = it + 140))
             },
             itemHeight = 40.dp,
             modifier = modifier,
@@ -225,7 +235,7 @@ fun HeightMetricValueContainer(
                 )
             }
         )
-    } else if (metric is HeightMetric.FeetInches) {
+    } else if (metric is HeightMetricUiModel.FeetInches) {
         Row(modifier = modifier) {
             ScrollableHapticContainer(
                 options = (1..10).map { it.toString() },

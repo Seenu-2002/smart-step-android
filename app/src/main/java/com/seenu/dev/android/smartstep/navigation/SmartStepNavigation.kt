@@ -12,13 +12,15 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.HomeScreen
-import com.seenu.dev.android.smartstep.onboarding.ProfileSetupScreen
+import com.seenu.dev.android.smartstep.profile_setup.presentation.ProfileSetupScreen
 
 @Composable
 fun SmartStepNavigation(
-    adaptiveLayoutType: AdaptiveLayoutType
+    adaptiveLayoutType: AdaptiveLayoutType,
+    startRoute: Route,
 ) {
-    val backstack = rememberNavBackStack(Route.StepCounterScreen)
+    val backstack = rememberNavBackStack(startRoute)
+
     NavDisplay(
         backStack = backstack,
         modifier = Modifier.fillMaxSize(),
@@ -26,12 +28,28 @@ fun SmartStepNavigation(
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
         entryProvider = { key ->
             when (key) {
+                Route.OnBoardingScreen -> {
+                    NavEntry(key) {
+                        ProfileSetupScreen(
+                            adaptiveLayoutType = adaptiveLayoutType,
+                            isUserOnboarding = true,
+                            onSetupCompleted = {
+                                backstack.removeLastOrNull()
+                                backstack.add(Route.StepCounterScreen)
+                            }
+                        )
+                    }
+                }
+
                 Route.ProfileSetupScreen -> {
                     NavEntry(key) {
                         ProfileSetupScreen(
                             adaptiveLayoutType = adaptiveLayoutType,
-                            onSkip = {
-                                TODO()
+                            onBack = {
+                                backstack.removeLastOrNull()
+                            },
+                            onSetupCompleted = {
+                                backstack.removeLastOrNull()
                             }
                         )
                     }
@@ -41,7 +59,9 @@ fun SmartStepNavigation(
                     NavEntry(key) {
                         HomeScreen(
                             adaptiveLayoutType = adaptiveLayoutType,
-                            onNavigatePersonalSettingsClick = {}
+                            onNavigatePersonalSettingsClick = {
+                                backstack.add(Route.ProfileSetupScreen)
+                            }
                         )
                     }
                 }
