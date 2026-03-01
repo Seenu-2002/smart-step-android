@@ -7,7 +7,8 @@ data class UserConfig constructor(
     val gender: Gender,
     val isFirstSetupCompleted: Boolean,
     val heightMetric: HeightMetric,
-    val weightMetric: WeightMetric
+    val weightMetric: WeightMetric,
+    val targetStepCount: Int = 6000 // Default target step count, can be updated by the user in the future
 )
 
 @Serializable

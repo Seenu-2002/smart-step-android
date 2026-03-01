@@ -1,5 +1,6 @@
 package com.seenu.dev.android.smartstep.design_system.components
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -14,10 +15,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.bodyLargeMedium
+import com.seenu.dev.android.smartstep.design_system.theme.strokeMain
 import com.seenu.dev.android.smartstep.design_system.theme.textWhite
 
 @Composable
-fun SmartStepPrimaryButton(
+fun SmartStepSecondaryButton(
     buttonText: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
@@ -26,11 +28,11 @@ fun SmartStepPrimaryButton(
         modifier = modifier
             .fillMaxWidth(),
         shape = MaterialTheme.shapes.medium,
+        onClick = onClick,
         colors = ButtonDefaults.textButtonColors(
-            containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.textWhite
+            containerColor = Color.Transparent,
+            contentColor = MaterialTheme.colorScheme.primary,
         ),
-        onClick = onClick
     ) {
         Text(
             text = buttonText,
@@ -41,10 +43,10 @@ fun SmartStepPrimaryButton(
 
 @Preview
 @Composable
-private fun SmartStepPrimaryButtonPreview() {
+private fun SmartStepSecondaryButtonPreview() {
     SmartStepTheme {
-        SmartStepPrimaryButton(
-            buttonText = "Next",
+        SmartStepSecondaryButton(
+            buttonText = "Cancel",
             onClick = {}
         )
     }

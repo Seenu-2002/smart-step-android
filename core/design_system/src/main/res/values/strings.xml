@@ -11,6 +11,7 @@
     <string name="unit_lbs">lbs</string>
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
+    <string name="save">Save</string>
     <string name="dialog_exit_text">The app will fully close and will not run in the background.</string>
     <string name="height_cm">%1$s cm</string>
     <string name="height_feet_inches">%1$s ft %2$s in</string>

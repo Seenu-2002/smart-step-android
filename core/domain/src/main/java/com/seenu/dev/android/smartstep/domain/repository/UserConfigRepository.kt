@@ -18,6 +18,8 @@ interface UserConfigRepository {
 
     suspend fun updateWeightMetric(weightMetric: WeightMetric)
 
+    suspend fun updateTargetStepCount(targetStepCount: Int)
+
     suspend fun updateGender(gender: Gender)
 
     suspend fun onFirstSetupCompleted()

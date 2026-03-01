@@ -35,6 +35,7 @@ import com.seenu.dev.android.smartstep.design_system.theme.textWhite
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExitConfirmationDialog(
+    onExit: () -> Unit = {},
     onDismissRequest: () -> Unit = {},
 ) {
     BasicAlertDialog(onDismissRequest = onDismissRequest) {
@@ -66,7 +67,7 @@ fun ExitConfirmationDialog(
             )
 
             Button(
-                onClick = onDismissRequest,
+                onClick = onExit,
                 Modifier
                     .fillMaxWidth()
                     .background(

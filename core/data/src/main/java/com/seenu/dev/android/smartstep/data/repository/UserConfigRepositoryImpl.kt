@@ -6,6 +6,7 @@ import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.seenu.dev.android.smartstep.domain.model.Gender
@@ -30,6 +31,7 @@ class UserConfigRepositoryImpl constructor(
     private val heightMetricKey = stringPreferencesKey("height_metric")
     private val weightMetricKey = stringPreferencesKey("weight_metric")
     private val isFirstSetupCompletedKey = booleanPreferencesKey("is_first_setup_completed")
+    private val targetStepCount = intPreferencesKey("target_step_count")
 
     @OptIn(ExperimentalCoroutinesApi::class)
     override fun getUserConfigFlow(): Flow<UserConfig> {
@@ -53,20 +55,25 @@ class UserConfigRepositoryImpl constructor(
             Gender.valueOf(it.uppercase())
         } ?: Gender.FEMALE
         val isFirstSetupCompleted = this[isFirstSetupCompletedKey] ?: false
+        val targetStepCount = this[targetStepCount] ?: 6000
 
         return UserConfig(
             gender = gender,
             isFirstSetupCompleted = isFirstSetupCompleted,
             heightMetric = heightMetric,
-            weightMetric = weightMetric
+            weightMetric = weightMetric,
+            targetStepCount = targetStepCount
         )
     }
 
     override suspend fun updateUserConfig(userConfig: UserConfig) {
-        updateHeightMetric(userConfig.heightMetric)
-        updateWeightMetric(userConfig.weightMetric)
-        updateGender(userConfig.gender)
-        onFirstSetupCompleted()
+        context.dataStore.edit { store ->
+            store[genderKey] = userConfig.gender.toString()
+            store[heightMetricKey] = Json.encodeToString(userConfig.heightMetric)
+            store[weightMetricKey] = Json.encodeToString(userConfig.weightMetric)
+            store[targetStepCount] = userConfig.targetStepCount
+            store[isFirstSetupCompletedKey] = true
+        }
     }
 
     override suspend fun updateHeightMetric(heightMetric: HeightMetric) {
@@ -78,6 +85,12 @@ class UserConfigRepositoryImpl constructor(
     override suspend fun updateWeightMetric(weightMetric: WeightMetric) {
         context.dataStore.edit { store ->
             store[weightMetricKey] = Json.encodeToString(weightMetric)
+        }
+    }
+
+    override suspend fun updateTargetStepCount(targetStepCount: Int) {
+        context.dataStore.edit { store ->
+            store[this.targetStepCount] = targetStepCount
         }
     }
 

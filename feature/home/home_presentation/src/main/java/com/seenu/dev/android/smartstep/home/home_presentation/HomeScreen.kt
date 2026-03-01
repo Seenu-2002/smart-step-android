@@ -6,6 +6,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -43,8 +44,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.seenu.dev.android.smartstep.design_system.components.ExitConfirmationDialog
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigationDrawer
 import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
+import com.seenu.dev.android.smartstep.design_system.components.StepGoalBottomSheet
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
@@ -144,12 +147,18 @@ fun HomeScreenRoot(
             scope.launch { drawerState.close() }
             onAction(HomeAction.OnFixStopCountingStepIssueClick)
         },
-        onStepGoalClick = {},
+        onStepGoalClick = {
+            scope.launch { drawerState.close() }
+            onAction(HomeAction.ShowStepGoalSheet)
+        },
         onPersonalSettingsClick = {
             scope.launch { drawerState.close() }
             onNavigatePersonalSettingsClick()
         },
-        onExitClick = {},
+        onExitClick = {
+            scope.launch { drawerState.close() }
+            onAction(HomeAction.ShowExitConfirmationDialog)
+        },
         drawerState = drawerState
     ) {
         Scaffold(
@@ -205,7 +214,10 @@ fun HomeScreenRoot(
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     if (uiState.activityRecognitionPermissionGranted) {
-                        StepCounterCard(2000, 10000)
+                        StepCounterCard(
+                            currentStepCount = uiState.currentSteps,
+                            targetStepCount = uiState.stepGoal
+                        )
                     } else {
                         uiState.permissionDenialStep?.let {
                             when (uiState.permissionDenialStep) {
@@ -215,6 +227,7 @@ fun HomeScreenRoot(
                                         onAllowAccessClick = { onAction(HomeAction.OnRequireActivityRecognitionPermission) }
                                     )
                                 }
+
                                 DenialStep.SECOND_DENIAL -> {
                                     PermissionSecondDenial(
                                         adaptiveLayoutType = adaptiveLayoutType,
@@ -230,6 +243,30 @@ fun HomeScreenRoot(
                             adaptiveLayoutType = adaptiveLayoutType,
                             onContinue = { onAction(HomeAction.OnBackgroundAccessRecommendedContinue) },
                             onDismissRequest = { onAction(HomeAction.OnBackgroundAccessRecommendedDismiss) }
+                        )
+                    }
+
+                    if (uiState.showExitConfirmationDialog) {
+                        val activity = LocalActivity.current
+                        ExitConfirmationDialog(
+                            onExit = {
+                                activity?.finishAffinity()
+                            },
+                            onDismissRequest = {
+                                onAction(HomeAction.DismissExitConfirmationDialog)
+                            }
+                        )
+                    }
+
+                    if (uiState.showStepGoalSheet) {
+                        StepGoalBottomSheet(
+                            currentValue = uiState.stepGoal,
+                            onSave = {
+                                onAction(HomeAction.UpdateStepGoal(it))
+                            },
+                            onDismissRequest = {
+                                onAction(HomeAction.DismissStepGoalSheet)
+                            }
                         )
                     }
                 }

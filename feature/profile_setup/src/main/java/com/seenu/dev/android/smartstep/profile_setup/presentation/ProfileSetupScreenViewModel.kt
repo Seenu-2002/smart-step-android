@@ -112,7 +112,7 @@ class ProfileSetupScreenViewModel constructor(
                     gender = defaultState.gender,
                     isFirstSetupCompleted = true,
                     heightMetric = defaultState.heightMetric.toDomainModel(),
-                    weightMetric = defaultState.weightMetric.toDomainModel()
+                    weightMetric = defaultState.weightMetric.toDomainModel(),
                 )
             )
             _sideEffects.emit(ProfileSetupSideEffect.OnProfileSetupComplete)

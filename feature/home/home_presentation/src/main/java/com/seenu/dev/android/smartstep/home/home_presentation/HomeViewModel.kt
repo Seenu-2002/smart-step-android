@@ -3,6 +3,7 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.seenu.dev.android.smartstep.domain.repository.PermissionRepository
+import com.seenu.dev.android.smartstep.domain.repository.UserConfigRepository
 import com.seenu.dev.android.smartstep.home.home_domain.BatteryOptimizationRepository
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
 import kotlinx.coroutines.channels.Channel
@@ -17,7 +18,8 @@ import kotlinx.coroutines.launch
 class HomeViewModel(
     private val permissionRepository: PermissionRepository,
     private val preferenceManager: PreferenceManager,
-    private val batteryOptimizationRepository: BatteryOptimizationRepository
+    private val batteryOptimizationRepository: BatteryOptimizationRepository,
+    private val userConfigRepository: UserConfigRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
@@ -28,6 +30,7 @@ class HomeViewModel(
 
     init {
         checkActivityRecognitionPermission()
+        observeUserConfig()
     }
 
     fun onAction(homeAction: HomeAction) {
@@ -94,6 +97,39 @@ class HomeViewModel(
                     )
                 }
             }
+
+            HomeAction.ShowExitConfirmationDialog -> {
+                _uiState.update {
+                    it.copy(showExitConfirmationDialog = true)
+                }
+            }
+
+            HomeAction.DismissExitConfirmationDialog -> {
+                _uiState.update {
+                    it.copy(showExitConfirmationDialog = false)
+                }
+            }
+
+            HomeAction.ShowStepGoalSheet -> {
+                _uiState.update {
+                    it.copy(showStepGoalSheet = true)
+                }
+            }
+
+            HomeAction.DismissStepGoalSheet -> {
+                _uiState.update {
+                    it.copy(showStepGoalSheet = false)
+                }
+            }
+
+            is HomeAction.UpdateStepGoal -> {
+                viewModelScope.launch {
+                    userConfigRepository.updateTargetStepCount(homeAction.stepGoal)
+                    _uiState.update {
+                        it.copy(stepGoal = homeAction.stepGoal, showStepGoalSheet = false)
+                    }
+                }
+            }
         }
     }
 
@@ -118,6 +154,18 @@ class HomeViewModel(
                     }
                 } else {
                     sendActivityRecognitionPermissionRequiredEvent()
+                }
+            }
+        }
+    }
+
+    private fun observeUserConfig() {
+        viewModelScope.launch {
+            userConfigRepository.getUserConfigFlow().collect { userConfig ->
+                _uiState.update {
+                    it.copy(
+                        stepGoal = userConfig.targetStepCount
+                    )
                 }
             }
         }
