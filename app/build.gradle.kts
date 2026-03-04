@@ -46,8 +46,28 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
+    // Splash
+    implementation(libs.core.splashscreen)
+
+    // Nav3
+    implementation(libs.androidx.navigation3.runtime)
+    implementation(libs.androidx.navigation3.ui)
+
+    // WindowSize
+    implementation(libs.window.size)
+
+    // Koin
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.androidx.compose)
+
     // Modules
     implementation(projects.core.designSystem)
     implementation(projects.core.data)
     implementation(projects.core.domain)
+    implementation(projects.feature.profileSetup)
+
+    implementation(projects.feature.home.homePresentation)
+    implementation(projects.feature.home.homeDomain)
+    implementation(projects.feature.home.homeData)
 }
