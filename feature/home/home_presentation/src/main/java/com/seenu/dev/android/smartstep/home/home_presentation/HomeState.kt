@@ -8,6 +8,16 @@ data class HomeState constructor(
     val isIgnoringBatteryOptimizations: Boolean = false,
     val showExitConfirmationDialog: Boolean = false,
     val showStepGoalSheet: Boolean = false,
-    val currentSteps: Int = 1340,
-    val stepGoal: Int = 3000,
+
+    // StepCounterCard state
+    val currentSteps: Int = 0,
+    val stepGoal: Int = 0,
+    val isPaused: Boolean = false,
+    val distanceText: String = "0.0",
+    val caloriesText: String = "0",
+    val minutesText: String = "0",
+    val isMetric: Boolean = true,
+
+    // EditStepDialog state
+    val showEditStepsDialog: Boolean = false
 )
