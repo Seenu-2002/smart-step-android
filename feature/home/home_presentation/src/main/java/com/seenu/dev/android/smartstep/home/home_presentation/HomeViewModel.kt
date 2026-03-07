@@ -6,10 +6,13 @@ import com.seenu.dev.android.smartstep.domain.repository.PermissionRepository
 import com.seenu.dev.android.smartstep.domain.repository.UserConfigRepository
 import com.seenu.dev.android.smartstep.home.home_domain.BatteryOptimizationRepository
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
+import com.seenu.dev.android.smartstep.home.home_domain.StepMetricsCalculator
+import com.seenu.dev.android.smartstep.home.home_domain.StepRepository
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
@@ -19,6 +22,7 @@ class HomeViewModel(
     private val permissionRepository: PermissionRepository,
     private val preferenceManager: PreferenceManager,
     private val batteryOptimizationRepository: BatteryOptimizationRepository,
+    private val stepRepository: StepRepository,
     private val userConfigRepository: UserConfigRepository
 ) : ViewModel() {
 
@@ -28,9 +32,14 @@ class HomeViewModel(
     private val eventChannel = Channel<HomeEvent>()
     val events = eventChannel.receiveAsFlow()
 
+    private var lastCalculatedSteps = 0
+
     init {
         checkActivityRecognitionPermission()
         observeUserConfig()
+
+        observePauseState()
+        observeStepsAndCalculate()
     }
 
     fun onAction(homeAction: HomeAction) {
@@ -130,6 +139,34 @@ class HomeViewModel(
                     }
                 }
             }
+
+            // StepCounterCard Action
+            HomeAction.OnPausePlayIconClick ->  {
+                viewModelScope.launch {
+                    val currentState = _uiState.value.isPaused
+                    preferenceManager.setStepTrackingPaused(!currentState)
+                }
+            }
+
+            // Currently just changing state no UI
+            HomeAction.OnEditStepsClick ->  {
+                _uiState.update { it.copy(showEditStepsDialog = true) }
+            }
+
+            HomeAction.DismissEditStepsDialog -> {
+                _uiState.update { it.copy(showEditStepsDialog = false) }
+            }
+
+            is HomeAction.OnSubmitEditedSteps -> { // (Assuming you rename OnUserTake10Steps to this)
+                viewModelScope.launch {
+                    // Save to Room DB. The 'combine' flow above will automatically
+                    // detect this change and force the UI to recalculate!
+                    stepRepository.updateStepsManually(homeAction.steps)
+
+                    // Close the dialog after saving
+                    _uiState.update { it.copy(showEditStepsDialog = false) }
+                }
+            }
         }
     }
 
@@ -185,4 +222,57 @@ class HomeViewModel(
         }
     }
 
+    private fun observePauseState() {
+        viewModelScope.launch {
+            preferenceManager.isStepTrackingPaused.collect { isPaused ->
+                _uiState.update { it.copy(isPaused = isPaused) }
+            }
+        }
+    }
+
+    // Assume you have a flow observing real-time steps from a DB or Service
+    private fun observeStepsAndCalculate() {
+        viewModelScope.launch {
+            // Combine listens to both flows from your Repository
+            combine(
+                stepRepository.getTodaySteps(),
+                stepRepository.getTodayActiveSeconds()
+            ) { steps, activeSeconds ->
+                Pair(steps, activeSeconds)
+            }.collect { (currentSteps, activeSeconds) ->
+                // Pass the activeSeconds into your update function
+                updateMetricsIfNeeded(currentSteps, activeSeconds, forceUpdate = false)
+            }
+        }
+    }
+
+    private fun updateMetricsIfNeeded(currentSteps: Int, activeSeconds: Long, forceUpdate: Boolean) {
+        val state = _uiState.value
+
+        if (state.isPaused && !forceUpdate) return
+
+        val stepDifference = kotlin.math.abs(currentSteps - lastCalculatedSteps)
+        if (forceUpdate || stepDifference >= 10) {
+            lastCalculatedSteps = currentSteps
+
+            // TODO: Hardcoded, Replace these with actual values from state
+            val heightCm = 175f
+            val weight = 70f
+            val isWeightLbs = false
+            val isMale = true
+
+            val distance = StepMetricsCalculator.calculateDistance(currentSteps, heightCm, state.isMetric)
+            val calories = StepMetricsCalculator.calculateCalories(currentSteps, weight, isWeightLbs, isMale)
+            val minutes = StepMetricsCalculator.calculateActiveMinutes(activeSeconds)
+
+            _uiState.update {
+                it.copy(
+                    currentSteps = currentSteps,
+                    distanceText = String.format(java.util.Locale.getDefault(), "%.1f", distance),
+                    caloriesText = calories.toString(),
+                    minutesText = minutes.toString()
+                )
+            }
+        }
+    }
 }
