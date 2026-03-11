@@ -4,8 +4,11 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
+import android.util.Log
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,6 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
@@ -57,9 +61,12 @@ import com.seenu.dev.android.smartstep.home.home_presentation.components.Permiss
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.findActivity
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.openAppSettings
+import com.seenu.dev.android.smartstep.home.home_presentation.extensions.startSmartStepService
+import com.seenu.dev.android.smartstep.home.home_presentation.service.SmartStepNotificationService
 import com.seenu.dev.android.smartstep.home.home_presentation.utils.ObserveAsEvents
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
+import kotlin.jvm.java
 
 @SuppressLint("InlinedApi", "UseKtx", "BatteryLife")
 @ExperimentalMaterial3Api
@@ -138,8 +145,29 @@ fun HomeScreenRoot(
     onNavigatePersonalSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            context.startSmartStepService()
+        }
+    }
+
+    LaunchedEffect(uiState.isIgnoringBatteryOptimizations) {
+        Log.d("asd", "HomeScreenRoot: LaunchedEffect")
+        if (uiState.isIgnoringBatteryOptimizations) {
+            Log.d("asd", "HomeScreenRoot: LaunchedEffect true")
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                context.startSmartStepService()
+            }
+        }
+    }
 
     SmartStepNavigationDrawer(
         showFixIssueItem = !uiState.isIgnoringBatteryOptimizations,

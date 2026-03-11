@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.smartstep.android.library.compose)
+    id("kotlin-parcelize")
 }
 
 android {
@@ -18,6 +19,10 @@ dependencies {
     // Koin
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
+
+    // ConstraintLayout
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.material)
 
     implementation(projects.core.designSystem)
     implementation(projects.core.domain)
