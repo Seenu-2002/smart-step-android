@@ -8,7 +8,8 @@ interface StepRepository {
     fun getTodayActiveSeconds(): Flow<Long>
     
     // Actions for the Sensor and UI
-    suspend fun addStep(activeTimeDeltaSeconds: Long)
     suspend fun updateStepsManually(newStepCount: Int)
     suspend fun resetToday()
+    suspend fun startCountingSteps()
+    fun stopCountingSteps()
 }

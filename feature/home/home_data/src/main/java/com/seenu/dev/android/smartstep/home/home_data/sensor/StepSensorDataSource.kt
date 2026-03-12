@@ -5,14 +5,19 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
-class StepSensorController(
+class StepSensorDataSource(
     context: Context,
-    private val onStepDetected: (activeTimeDeltaSeconds: Long) -> Unit
 ) : SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+    private val _steps = MutableStateFlow(SensorData())
+    val steps: StateFlow<SensorData> = _steps
 
     private var lastStepTimestampMs: Long = 0L
 
@@ -28,7 +33,7 @@ class StepSensorController(
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_STEP_DETECTOR) {
+        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val currentTimestampMs = System.currentTimeMillis()
             var deltaSeconds = 0L
 
@@ -41,7 +46,12 @@ class StepSensorController(
             
             lastStepTimestampMs = currentTimestampMs
 
-            onStepDetected(deltaSeconds)
+            _steps.update {
+                it.copy(
+                    totalSteps = event.values[0].toInt(),
+                    activeSeconds = deltaSeconds
+                )
+            }
         }
     }
 

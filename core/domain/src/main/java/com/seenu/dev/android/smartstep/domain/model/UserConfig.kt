@@ -27,6 +27,14 @@ sealed interface HeightMetric {
 
 @Serializable
 sealed interface WeightMetric {
+
+    fun getWeightValue(): Int {
+        return when (this) {
+            is Kilograms -> weight
+            is Pounds -> weight
+        }
+    }
+
     @Serializable
     data class Kilograms(val weight: Int) : WeightMetric
 

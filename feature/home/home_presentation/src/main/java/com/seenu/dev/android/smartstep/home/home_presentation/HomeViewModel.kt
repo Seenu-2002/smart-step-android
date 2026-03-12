@@ -2,18 +2,26 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seenu.dev.android.smartstep.domain.extensions.toCentimeters
+import com.seenu.dev.android.smartstep.domain.model.Gender
+import com.seenu.dev.android.smartstep.domain.model.HeightMetric
+import com.seenu.dev.android.smartstep.domain.model.UserConfig
+import com.seenu.dev.android.smartstep.domain.model.WeightMetric
 import com.seenu.dev.android.smartstep.domain.repository.PermissionRepository
 import com.seenu.dev.android.smartstep.domain.repository.UserConfigRepository
 import com.seenu.dev.android.smartstep.home.home_domain.BatteryOptimizationRepository
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
 import com.seenu.dev.android.smartstep.home.home_domain.StepMetricsCalculator
 import com.seenu.dev.android.smartstep.home.home_domain.StepRepository
+import com.seenu.dev.android.smartstep.home.home_presentation.models.MetricsDataUi
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -232,21 +240,23 @@ class HomeViewModel(
 
     // Assume you have a flow observing real-time steps from a DB or Service
     private fun observeStepsAndCalculate() {
-        viewModelScope.launch {
-            // Combine listens to both flows from your Repository
-            combine(
-                stepRepository.getTodaySteps(),
-                stepRepository.getTodayActiveSeconds()
-            ) { steps, activeSeconds ->
-                Pair(steps, activeSeconds)
-            }.collect { (currentSteps, activeSeconds) ->
-                // Pass the activeSeconds into your update function
-                updateMetricsIfNeeded(currentSteps, activeSeconds, forceUpdate = false)
-            }
-        }
+        combine(
+            stepRepository.getTodaySteps(),
+            stepRepository.getTodayActiveSeconds(),
+            userConfigRepository.getUserConfigFlow()
+        ) {currentSteps, activeSeconds, userConfig ->
+            MetricsDataUi(currentSteps, activeSeconds, userConfig)
+        }.onEach { (currentSteps, activeSeconds, userConfig) ->
+            updateMetricsIfNeeded(currentSteps, activeSeconds, userConfig, forceUpdate = false)
+        }.launchIn(viewModelScope)
     }
 
-    private fun updateMetricsIfNeeded(currentSteps: Int, activeSeconds: Long, forceUpdate: Boolean) {
+    private fun updateMetricsIfNeeded(
+        currentSteps: Int,
+        activeSeconds: Long,
+        userConfig: UserConfig,
+        forceUpdate: Boolean
+    ) {
         val state = _uiState.value
 
         if (state.isPaused && !forceUpdate) return
@@ -255,11 +265,13 @@ class HomeViewModel(
         if (forceUpdate || stepDifference >= 10) {
             lastCalculatedSteps = currentSteps
 
-            // TODO: Hardcoded, Replace these with actual values from state
-            val heightCm = 175f
-            val weight = 70f
-            val isWeightLbs = false
-            val isMale = true
+            val heightCm = when (val height = userConfig.heightMetric) {
+                is HeightMetric.Centimeters -> height.value
+                is HeightMetric.FeetInches -> height.toCentimeters()
+            }.toFloat()
+            val weight = userConfig.weightMetric.getWeightValue().toFloat()
+            val isWeightLbs = userConfig.weightMetric is WeightMetric.Pounds
+            val isMale = userConfig.gender == Gender.MALE
 
             val distance = StepMetricsCalculator.calculateDistance(currentSteps, heightCm, state.isMetric)
             val calories = StepMetricsCalculator.calculateCalories(currentSteps, weight, isWeightLbs, isMale)

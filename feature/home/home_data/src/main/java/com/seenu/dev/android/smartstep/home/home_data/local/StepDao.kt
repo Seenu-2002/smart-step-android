@@ -9,14 +9,14 @@ import kotlinx.coroutines.flow.Flow
 interface StepDao {
     // Returns a Flow for the UI to observe continuously
     @Query("SELECT * FROM step_history WHERE date = :date")
-    fun getStepsForDateFlow(date: String): Flow<StepEntity?>
+    fun getStepsForDateFlow(date: String): Flow<DailyStepEntity?>
 
     // Returns a single object for the Service to use when doing math
     @Query("SELECT * FROM step_history WHERE date = :date")
-    suspend fun getStepsForDateSync(date: String): StepEntity?
+    suspend fun getStepsForDateSync(date: String): DailyStepEntity?
 
     @Upsert
-    suspend fun upsertStepData(stepEntity: StepEntity)
+    suspend fun upsertStepData(dailyStepEntity: DailyStepEntity)
 
     @Query("DELETE FROM step_history WHERE date = :date")
     suspend fun deleteDate(date: String)
