@@ -1,5 +1,7 @@
 plugins {
     alias(libs.plugins.smartstep.android.library.compose)
+//    alias(libs.plugins.smartstep.android.room)
+    alias(libs.plugins.google.ksp)
 }
 
 android {
@@ -22,4 +24,10 @@ dependencies {
 
     implementation(projects.core.designSystem)
     implementation(projects.feature.home.homeDomain)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    implementation(libs.androidx.datastore.preferences)
+    ksp(libs.androidx.room.compiler)
 }

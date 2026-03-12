@@ -14,4 +14,12 @@ sealed interface HomeAction {
     object ShowStepGoalSheet : HomeAction
     object DismissStepGoalSheet : HomeAction
     data class UpdateStepGoal(val stepGoal: Int) : HomeAction
+
+    // StepCounterCard Action
+    object OnPausePlayIconClick : HomeAction
+    object OnEditStepsClick : HomeAction
+    data class OnSubmitEditedSteps(val steps: Int) : HomeAction
+
+    // EditStepDialog Action
+    object DismissEditStepsDialog : HomeAction
 }
