@@ -8,6 +8,7 @@ import com.seenu.dev.android.smartstep.home.home_data.PreferenceManagerImpl
 import com.seenu.dev.android.smartstep.home.home_data.StepRepositoryImpl
 import com.seenu.dev.android.smartstep.home.home_data.dataStore
 import com.seenu.dev.android.smartstep.home.home_data.local.StepDatabase
+import com.seenu.dev.android.smartstep.home.home_data.sensor.StepSensorController
 import com.seenu.dev.android.smartstep.home.home_domain.BatteryOptimizationRepository
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
 import com.seenu.dev.android.smartstep.home.home_domain.StepRepository
@@ -32,4 +33,6 @@ val homeDataModule = module {
     single { get<StepDatabase>().stepDao }
 
     single<StepRepository> { StepRepositoryImpl(stepDao = get()) }
+
+    single { StepSensorController(context = androidContext()) }
 }

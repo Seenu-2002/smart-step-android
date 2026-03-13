@@ -19,13 +19,13 @@ class StepTrackingService : Service() {
     private val preferenceManager: PreferenceManager by inject()
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var sensorController: StepSensorController? = null
+    private val sensorController: StepSensorController by inject()
 
     override fun onCreate() {
         super.onCreate()
 
-        sensorController = StepSensorController(this) { activeSecondsDelta ->
-            serviceScope.launch {
+        serviceScope.launch {
+            sensorController.stepEvents.collect { activeSecondsDelta ->
                 stepRepository.addStep(activeSecondsDelta)
             }
         }
@@ -36,8 +36,8 @@ class StepTrackingService : Service() {
     private fun observePauseState() {
         serviceScope.launch {
             preferenceManager.isStepTrackingPaused.collect { isPaused ->
-                if (isPaused) sensorController?.stopListening()
-                else sensorController?.startListening()
+                if (isPaused) sensorController.stopListening()
+                else sensorController.startListening()
             }
         }
     }
@@ -53,7 +53,7 @@ class StepTrackingService : Service() {
 
     override fun onDestroy() {
         super.onDestroy()
-        sensorController?.stopListening()
+        sensorController.stopListening()
         serviceScope.cancel()
     }
 

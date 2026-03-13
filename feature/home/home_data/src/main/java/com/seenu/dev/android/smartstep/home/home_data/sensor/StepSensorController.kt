@@ -5,16 +5,24 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 
-class StepSensorController(
-    context: Context,
-    private val onStepDetected: (activeTimeDeltaSeconds: Long) -> Unit
-) : SensorEventListener {
+class StepSensorController(context: Context) : SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
     private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
 
     private var lastStepTimestampMs: Long = 0L
+
+    // 2. Add the Flow (The "Radio Station")
+    // We use extraBufferCapacity so tryEmit never fails if the collector is slightly slow
+    private val _stepEvents = MutableSharedFlow<Long>(
+        extraBufferCapacity = 1,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val stepEvents = _stepEvents.asSharedFlow()
 
     fun startListening() {
         stepSensor?.let {
@@ -41,7 +49,7 @@ class StepSensorController(
             
             lastStepTimestampMs = currentTimestampMs
 
-            onStepDetected(deltaSeconds)
+            _stepEvents.tryEmit(deltaSeconds)
         }
     }
 
