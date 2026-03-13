@@ -12,4 +12,9 @@
     <string name="background_access_msg">Background access helps Smart Step track your activity more reliably.</string>
     <string name="lbl_continue">Continue</string>
     <string name="smart_step">Smart Step</string>
+    <string name="date">Date</string>
+    <string name="edit_steps_msg"><![CDATA[Calories, distance & duration will be recalculated accordingly.]]></string>
+    <string name="steps">Steps</string>
+    <string name="save">Save</string>
+    <string name="edit_steps">Edit Steps</string>
 </resources>
