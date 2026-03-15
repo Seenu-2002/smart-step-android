@@ -13,25 +13,23 @@ class StepRepositoryImpl(
     private val stepDao: StepDao
 ) : StepRepository {
 
+    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
     // todo better use LocalDate.now().toString() but need to add desugar in gradle
     private val today: String
-        get() {
-            val calendar = Calendar.getInstance()
-            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            return formatter.format(calendar.time)
-        }
+        get() = dateFormatter.format(Calendar.getInstance().time)
 
     override fun getTodaySteps(): Flow<Int> {
-        return stepDao.getStepsForDateFlow(today).map { it?.stepCount ?: 0 }
+        return stepDao.observeStepsForDate(today).map { it?.stepCount ?: 0 }
     }
 
     override fun getTodayActiveSeconds(): Flow<Long> {
-        return stepDao.getStepsForDateFlow(today).map { it?.activeSeconds ?: 0L }
+        return stepDao.observeStepsForDate(today).map { it?.activeSeconds ?: 0L }
     }
 
     override suspend fun addStep(activeTimeDeltaSeconds: Long) {
         val currentDate = today
-        val currentEntry = stepDao.getStepsForDateSync(currentDate)
+        val currentEntry = stepDao.getStepsForDate(currentDate)
 
         if (currentEntry == null) {
             stepDao.upsertStepData(
@@ -49,7 +47,7 @@ class StepRepositoryImpl(
 
     override suspend fun updateStepsManually(newStepCount: Int) {
         val currentDate = today
-        val currentEntry = stepDao.getStepsForDateSync(currentDate)
+        val currentEntry = stepDao.getStepsForDate(currentDate)
 
         if (currentEntry == null) {
             stepDao.upsertStepData(StepEntity(currentDate, newStepCount, 0L))

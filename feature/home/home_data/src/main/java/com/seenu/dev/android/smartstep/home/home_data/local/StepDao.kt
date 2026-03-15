@@ -9,11 +9,11 @@ import kotlinx.coroutines.flow.Flow
 interface StepDao {
     // Returns a Flow for the UI to observe continuously
     @Query("SELECT * FROM step_history WHERE date = :date")
-    fun getStepsForDateFlow(date: String): Flow<StepEntity?>
+    fun observeStepsForDate(date: String): Flow<StepEntity?>
 
     // Returns a single object for the Service to use when doing math
     @Query("SELECT * FROM step_history WHERE date = :date")
-    suspend fun getStepsForDateSync(date: String): StepEntity?
+    suspend fun getStepsForDate(date: String): StepEntity?
 
     @Upsert
     suspend fun upsertStepData(stepEntity: StepEntity)
