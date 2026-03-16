@@ -21,6 +21,7 @@ class PreferenceManagerImpl(
         val FIRST_INSTALL = booleanPreferencesKey("is_first_install")
         val ACTIVITY_RECOGNITION_RATIONALE_ALREADY_SHOWED = booleanPreferencesKey("act_rec_rationale_already_showed")
         val BACKGROUND_PERMISSION_REQUIRED = booleanPreferencesKey("background_permission_required")
+        val IS_STEP_TRACKING_PAUSED = booleanPreferencesKey("is_step_tracking_paused")
     }
 
     override val isFirstInstall: Flow<Boolean>
@@ -44,4 +45,10 @@ class PreferenceManagerImpl(
         dataStore.edit { it[Keys.BACKGROUND_PERMISSION_REQUIRED] = true }
     }
 
+    override val isStepTrackingPaused: Flow<Boolean>
+        get() = dataStore.data.map { it[Keys.IS_STEP_TRACKING_PAUSED] ?: false }
+
+    override suspend fun setStepTrackingPaused(isPaused: Boolean) {
+        dataStore.edit { it[Keys.IS_STEP_TRACKING_PAUSED] = isPaused }
+    }
 }

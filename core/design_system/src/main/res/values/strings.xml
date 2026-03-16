@@ -21,6 +21,13 @@
     <string name="current_steps">%,d</string>
     <string name="target_steps">/%d step</string>
 
+    <string name="paused">paused</string>
+
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+    <string name="unit_kcal">kcal</string>
+    <string name="unit_min">min</string>
+
     <!--  navigation_drawer area  -->
     <string name="fix_the_stop_counting_steps_issue">Fix the “Stop Counting Steps” issue</string>
     <string name="step_goal">Step Goal</string>
