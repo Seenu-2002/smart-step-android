@@ -156,7 +156,6 @@ class HomeViewModel(
                 }
             }
 
-            // Currently just changing state no UI
             HomeAction.OnEditStepsClick ->  {
                 _uiState.update { it.copy(showEditStepsDialog = true) }
             }
@@ -169,7 +168,7 @@ class HomeViewModel(
                 viewModelScope.launch {
                     // Save to Room DB. The 'combine' flow above will automatically
                     // detect this change and force the UI to recalculate!
-                    stepRepository.updateStepsManually(homeAction.steps)
+                    stepRepository.updateStepsManually(homeAction.steps, homeAction.date)
 
                     // Close the dialog after saving
                     _uiState.update { it.copy(showEditStepsDialog = false) }

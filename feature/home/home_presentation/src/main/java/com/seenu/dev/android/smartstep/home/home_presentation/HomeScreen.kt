@@ -53,6 +53,7 @@ import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.components.BackgroundAccessPermission
+import com.seenu.dev.android.smartstep.home.home_presentation.components.EditStepsDialog
 import com.seenu.dev.android.smartstep.home.home_presentation.components.ObserveOnResume
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionFirstDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
@@ -283,6 +284,17 @@ fun HomeScreenRoot(
                             },
                             onDismissRequest = {
                                 onAction(HomeAction.DismissExitConfirmationDialog)
+                            }
+                        )
+                    }
+
+                    if (uiState.showEditStepsDialog) {
+                        EditStepsDialog(
+                            onSave = { steps, date ->
+                                onAction(HomeAction.OnSubmitEditedSteps(steps, date))
+                            },
+                            onDismissRequest = {
+                                onAction(HomeAction.DismissEditStepsDialog)
                             }
                         )
                     }
