@@ -29,8 +29,15 @@
     <string name="day_friday">Fri</string>
     <string name="day_saturday">Sat</string>
     <string name="daily_average_steps">Daily Average: %1$s steps</string>
-    
-    
+
+
+    <string name="paused">Paused</string>
+
+    <string name="unit_km">km</string>
+    <string name="unit_mi">mi</string>
+    <string name="unit_kcal">kcal</string>
+    <string name="unit_min">min</string>
+
     <!--  navigation_drawer area  -->
     <string name="fix_the_stop_counting_steps_issue">Fix the “Stop Counting Steps” issue</string>
     <string name="step_goal">Step Goal</string>

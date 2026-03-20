@@ -6,6 +6,8 @@ import android.content.ContextWrapper
 import android.content.Intent
 import android.net.Uri
 import android.provider.Settings
+import androidx.core.content.ContextCompat
+import com.seenu.dev.android.smartstep.home.home_presentation.service.SmartStepNotificationService
 
 /**
  * Helper function to find the Activity from a Context
@@ -24,4 +26,9 @@ fun Context.openAppSettings() {
     )
     intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
     startActivity(intent)
+}
+
+fun Context.startSmartStepService() {
+    val intent = Intent(this, SmartStepNotificationService::class.java)
+    ContextCompat.startForegroundService(this, intent)
 }

@@ -5,6 +5,7 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -57,6 +58,7 @@ import com.seenu.dev.android.smartstep.home.home_presentation.components.Permiss
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.findActivity
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.openAppSettings
+import com.seenu.dev.android.smartstep.home.home_presentation.extensions.startSmartStepService
 import com.seenu.dev.android.smartstep.home.home_presentation.utils.ObserveAsEvents
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -138,8 +140,27 @@ fun HomeScreenRoot(
     onNavigatePersonalSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            context.startSmartStepService()
+        }
+    }
+
+    LaunchedEffect(uiState.isIgnoringBatteryOptimizations) {
+        if (uiState.isIgnoringBatteryOptimizations) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                context.startSmartStepService()
+            }
+        }
+    }
 
     SmartStepNavigationDrawer(
         showFixIssueItem = !uiState.isIgnoringBatteryOptimizations,
@@ -216,7 +237,15 @@ fun HomeScreenRoot(
                     if (uiState.activityRecognitionPermissionGranted) {
                         StepCounterCard(
                             currentStepCount = uiState.currentSteps,
-                            targetStepCount = uiState.stepGoal
+                            targetStepCount = uiState.stepGoal,
+                            // Pass the new calculated metrics
+                            distanceText = uiState.distanceText,
+                            caloriesText = uiState.caloriesText,
+                            walkingTimeMinutesText = uiState.minutesText,
+                            // Pass the pause state and actions
+                            isPaused = uiState.isPaused,
+                            onPausePlayIconClick = { onAction(HomeAction.OnPausePlayIconClick) },
+                            onPenIconClick = { onAction(HomeAction.OnEditStepsClick) }
                         )
                     } else {
                         uiState.permissionDenialStep?.let {
