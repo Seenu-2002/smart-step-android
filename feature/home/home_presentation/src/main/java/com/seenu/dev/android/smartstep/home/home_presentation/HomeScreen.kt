@@ -216,7 +216,15 @@ fun HomeScreenRoot(
                     if (uiState.activityRecognitionPermissionGranted) {
                         StepCounterCard(
                             currentStepCount = uiState.currentSteps,
-                            targetStepCount = uiState.stepGoal
+                            targetStepCount = uiState.stepGoal,
+                            // Pass the new calculated metrics
+                            distanceText = uiState.distanceText,
+                            caloriesText = uiState.caloriesText,
+                            walkingTimeMinutesText = uiState.minutesText,
+                            // Pass the pause state and actions
+                            isPaused = uiState.isPaused,
+                            onPausePlayIconClick = { onAction(HomeAction.OnPausePlayIconClick) },
+                            onPenIconClick = { onAction(HomeAction.OnEditStepsClick) }
                         )
                     } else {
                         uiState.permissionDenialStep?.let {
