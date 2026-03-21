@@ -44,6 +44,10 @@ class UserConfigRepositoryImpl constructor(
         return context.dataStore.data.first().toUserConfig()
     }
 
+    override suspend fun getDailyStepGoal(): Int {
+        return context.dataStore.data.first()[targetStepCount] ?: 6000
+    }
+
     private fun Preferences.toUserConfig(): UserConfig {
         val heightMetric = this[heightMetricKey]?.let {
             Json.decodeFromString<HeightMetric>(it)

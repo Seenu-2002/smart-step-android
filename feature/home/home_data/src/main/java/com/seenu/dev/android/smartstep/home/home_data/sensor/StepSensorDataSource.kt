@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 
+// TODO: REBOOT issue. Refer: Claude chat
 class StepSensorDataSource(
     context: Context,
 ) : SensorEventListener {

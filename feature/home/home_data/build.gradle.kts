@@ -23,4 +23,5 @@ dependencies {
 
     implementation(projects.core.designSystem)
     implementation(projects.feature.home.homeDomain)
+    implementation(projects.core.domain)
 }

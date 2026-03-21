@@ -4,8 +4,9 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity(tableName = "step_history")
-data class DailyStepEntity(
+data class DailyStepEntity constructor(
     @PrimaryKey val date: String, // Format: YYYY-MM-DD
     val stepCount: Int,
+    val stepGoal: Int,
     val activeSeconds: Long
 )

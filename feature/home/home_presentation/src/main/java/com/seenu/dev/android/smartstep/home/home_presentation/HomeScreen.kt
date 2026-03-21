@@ -13,10 +13,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCard
 import com.seenu.dev.android.smartstep.design_system.components.ExitConfirmationDialog
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigationDrawer
 import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
@@ -232,6 +237,7 @@ fun HomeScreenRoot(
                     modifier = Modifier
                         .fillMaxWidth()
                         .widthIn(max = if (adaptiveLayoutType.isWide) 394.dp else Dp.Unspecified)
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -247,6 +253,10 @@ fun HomeScreenRoot(
                             isPaused = uiState.isPaused,
                             onPausePlayIconClick = { onAction(HomeAction.OnPausePlayIconClick) },
                             onPenIconClick = { onAction(HomeAction.OnEditStepsClick) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DailyAverageStepsCard(
+                            data = uiState.dailyAverageStepsCardData
                         )
                     } else {
                         uiState.permissionDenialStep?.let {

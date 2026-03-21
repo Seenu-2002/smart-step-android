@@ -39,7 +39,8 @@ val homeDataModule = module {
     single<StepRepository> { StepRepositoryImpl(
         stepSensorDataSource = get(),
         stepDao = get(),
-        stepSensorPreferences = get()
+        stepSensorPreferences = get(),
+        userConfigRepository = get()
     ) }
 
     single { StepSensorDataSource(get()) }

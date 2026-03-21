@@ -2,6 +2,8 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCardData
+import com.seenu.dev.android.smartstep.design_system.components.StepsPerDayData
 import com.seenu.dev.android.smartstep.domain.extensions.toCentimeters
 import com.seenu.dev.android.smartstep.domain.model.Gender
 import com.seenu.dev.android.smartstep.domain.model.HeightMetric
@@ -25,6 +27,11 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+typealias DesignSystemString = com.seenu.dev.android.core.design_system.R.string
 
 class HomeViewModel(
     private val permissionRepository: PermissionRepository,
@@ -48,6 +55,7 @@ class HomeViewModel(
 
         observePauseState()
         observeStepsAndCalculate()
+        observerDailyAverageSteps()
     }
 
     fun onAction(homeAction: HomeAction) {
@@ -142,6 +150,8 @@ class HomeViewModel(
             is HomeAction.UpdateStepGoal -> {
                 viewModelScope.launch {
                     userConfigRepository.updateTargetStepCount(homeAction.stepGoal)
+                    val today = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date())
+                    stepRepository.updateStepGoal(homeAction.stepGoal, today)
                     _uiState.update {
                         it.copy(stepGoal = homeAction.stepGoal, showStepGoalSheet = false)
                     }
@@ -212,6 +222,59 @@ class HomeViewModel(
                     )
                 }
             }
+        }
+    }
+
+    private fun observerDailyAverageSteps() {
+        viewModelScope.launch {
+            // TODO: Should be injected via DI
+            val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val calendar = Calendar.getInstance()
+            val today = formatter.format(calendar.time)
+            calendar.add(Calendar.DAY_OF_YEAR, -6)
+            val startingDate = formatter.format(calendar.time)
+            stepRepository.getStepsForRangeFlow(startingDate, today).collect { stepsPerDay ->
+                val data = if (stepsPerDay.isEmpty()) {
+                    DailyAverageStepsCardData(
+                        averageStepsPerDay = 0,
+                        stepsPerDay = emptyList()
+                    )
+                } else {
+                    val averageStepsPerDay = stepsPerDay.sumOf { it.steps } / 7 // Assuming 7 days in the range
+                    DailyAverageStepsCardData(
+                        averageStepsPerDay = averageStepsPerDay,
+                        stepsPerDay = stepsPerDay.map { stepData ->
+                            StepsPerDayData(
+                                dayLabelRes = getDayLabelResForDate(stepData.date),
+                                steps = stepData.steps,
+                                goal = stepData.goal
+                            )
+                        }
+                    )
+                }
+
+                _uiState.update {
+                    it.copy(dailyAverageStepsCardData = data)
+                }
+            }
+        }
+    }
+    
+    // TODO: This has to be injected from DI and move this function into a util
+    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+    private fun getDayLabelResForDate(label: String): Int {
+        val date = dateFormatter.parse(label)
+        val calendar = Calendar.getInstance()
+        calendar.time = date!!
+        return when (calendar.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.SUNDAY ->  DesignSystemString.day_sunday
+            Calendar.MONDAY -> DesignSystemString.day_monday
+            Calendar.TUESDAY -> DesignSystemString.day_tuesday
+            Calendar.WEDNESDAY -> DesignSystemString.day_wednesday
+            Calendar.THURSDAY -> DesignSystemString.day_thursday
+            Calendar.FRIDAY -> DesignSystemString.day_friday
+            Calendar.SATURDAY -> DesignSystemString.day_saturday
+            else -> throw IllegalArgumentException("Invalid date: $label")
         }
     }
 

@@ -41,15 +41,14 @@ private fun DailyAverageStepsCard_Preview() {
     SmartStepTheme {
         val data = DailyAverageStepsCardData(
             averageStepsPerDay = 5000,
-            targetPerDay = 10000,
-            stepsPerDay = mapOf(
-                Day.SUNDAY to 3000,
-                Day.MONDAY to 4000,
-                Day.TUESDAY to 5000,
-                Day.WEDNESDAY to 6000,
-                Day.THURSDAY to 7000,
-                Day.FRIDAY to 8000,
-                Day.SATURDAY to 900000
+            stepsPerDay = listOf(
+                StepsPerDayData(dayLabelRes = R.string.day_sunday, steps = 3000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_monday, steps = 4000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_tuesday, steps = 5000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_wednesday, steps = 6000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_thursday, steps = 7000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_friday, steps = 8000, goal = 10000),
+                StepsPerDayData(dayLabelRes = R.string.day_saturday, steps = 900000, goal = 10000)
             )
         )
         DailyAverageStepsCard(
@@ -89,12 +88,12 @@ fun DailyAverageStepsCard(data: DailyAverageStepsCardData, modifier: Modifier = 
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-            for (day in Day.entries) {
-                val steps = data.stepsPerDay[day] ?: 0
+            for (stepData in data.stepsPerDay) {
+                val steps = stepData.steps
                 StepsPerDay(
-                    dayText = day.getString(),
+                    dayText = stringResource(stepData.dayLabelRes),
                     steps = steps,
-                    target = data.targetPerDay,
+                    target = stepData.goal,
                     stepCountLabel = numberFormatter.format(steps),
                     modifier = Modifier.weight(1F)
                 )
@@ -106,33 +105,15 @@ fun DailyAverageStepsCard(data: DailyAverageStepsCardData, modifier: Modifier = 
 @Stable
 data class DailyAverageStepsCardData constructor(
     val averageStepsPerDay: Int,
-    val targetPerDay: Int,
-    val stepsPerDay: Map<Day, Int> = mapOf()
+    val stepsPerDay: List<StepsPerDayData> = listOf()
 )
 
-enum class Day {
-    SUNDAY,
-    MONDAY,
-    TUESDAY,
-    WEDNESDAY,
-    THURSDAY,
-    FRIDAY,
-    SATURDAY
-}
-
-@Composable
-fun Day.getString(): String {
-    val res = when (this) {
-        Day.SUNDAY -> R.string.day_sunday
-        Day.MONDAY -> R.string.day_monday
-        Day.TUESDAY -> R.string.day_tuesday
-        Day.WEDNESDAY -> R.string.day_wednesday
-        Day.THURSDAY -> R.string.day_thursday
-        Day.FRIDAY -> R.string.day_friday
-        Day.SATURDAY -> R.string.day_saturday
-    }
-    return stringResource(res)
-}
+@Stable
+data class StepsPerDayData constructor(
+    val dayLabelRes: Int,
+    val steps: Int,
+    val goal: Int
+)
 
 @Preview
 @Composable
@@ -185,7 +166,7 @@ fun StepsPerDay(
             )
 
             val startAngle = -90F
-            val endAngle = ((steps / target.toFloat()) * 360F)
+            val endAngle = ((steps / target.toFloat()) * 360F).coerceAtMost(360F)
             drawArc(
                 color = progressColor,
                 startAngle = startAngle,

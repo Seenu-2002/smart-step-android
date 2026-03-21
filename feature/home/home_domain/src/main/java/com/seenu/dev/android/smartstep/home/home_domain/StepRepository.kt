@@ -1,5 +1,6 @@
 package com.seenu.dev.android.smartstep.home.home_domain
 
+import com.seenu.dev.android.smartstep.home.home_domain.model.StepsPerDay
 import kotlinx.coroutines.flow.Flow
 
 interface StepRepository {
@@ -9,7 +10,9 @@ interface StepRepository {
     
     // Actions for the Sensor and UI
     suspend fun updateStepsManually(newStepCount: Int, date: String)
+    suspend fun updateStepGoal(newStepGoal: Int, date: String)
     suspend fun resetToday()
     suspend fun startCountingSteps()
     fun stopCountingSteps()
+    fun getStepsForRangeFlow(startDate: String, endDate: String): Flow<List<StepsPerDay>>
 }
