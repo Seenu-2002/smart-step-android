@@ -3,7 +3,7 @@ package com.seenu.dev.android.smartstep.home.home_data.service
 import android.app.Service
 import android.content.Intent
 import android.os.IBinder
-import com.seenu.dev.android.smartstep.home.home_data.sensor.StepSensorController
+import com.seenu.dev.android.smartstep.home.home_data.sensor.StepSensorDataSource
 import com.seenu.dev.android.smartstep.home.home_domain.PreferenceManager
 import com.seenu.dev.android.smartstep.home.home_domain.StepRepository
 import kotlinx.coroutines.CoroutineScope
@@ -19,16 +19,12 @@ class StepTrackingService : Service() {
     private val preferenceManager: PreferenceManager by inject()
 
     private val serviceScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    private var sensorController: StepSensorController? = null
+    private var sensorController: StepSensorDataSource? = null
 
     override fun onCreate() {
         super.onCreate()
 
-        sensorController = StepSensorController(this) { activeSecondsDelta ->
-            serviceScope.launch {
-                stepRepository.addStep(activeSecondsDelta)
-            }
-        }
+
 
         observePauseState()
     }

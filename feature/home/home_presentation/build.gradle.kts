@@ -19,6 +19,10 @@ dependencies {
     implementation(libs.koin.android)
     implementation(libs.koin.androidx.compose)
 
+    // ConstraintLayout
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.material)
+
     implementation(projects.core.designSystem)
     implementation(projects.core.domain)
     implementation(projects.feature.home.homeDomain)
