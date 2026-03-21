@@ -30,12 +30,11 @@ class StepRepositoryImpl(
         return stepDao.getStepsForDateFlow(getToday()).map { it?.activeSeconds ?: 0L }
     }
 
-    override suspend fun updateStepsManually(newStepCount: Int) {
-        val currentDate = getToday()
-        val currentEntry = stepDao.getStepsForDateSync(currentDate)
+    override suspend fun updateStepsManually(newStepCount: Int, date: String) {
+        val currentEntry = stepDao.getStepsForDateSync(date)
 
         if (currentEntry == null) {
-            stepDao.upsertStepData(DailyStepEntity(currentDate, newStepCount, 0L))
+            stepDao.upsertStepData(DailyStepEntity(date, newStepCount, 0L))
         } else {
             stepDao.upsertStepData(currentEntry.copy(stepCount = newStepCount))
         }
