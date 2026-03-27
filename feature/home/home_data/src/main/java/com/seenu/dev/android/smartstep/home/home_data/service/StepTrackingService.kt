@@ -23,9 +23,6 @@ class StepTrackingService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-
-
-
         observePauseState()
     }
 

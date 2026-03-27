@@ -26,6 +26,12 @@ class StepRepositoryImpl(
     private val userConfigRepository: UserConfigRepository
 ) : StepRepository {
 
+    private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+
+    // todo better use LocalDate.now().toString() but need to add desugar in gradle
+    private val today: String
+        get() = dateFormatter.format(Calendar.getInstance().time)
+
     override fun getTodaySteps(): Flow<Int> {
         return stepDao.getStepsForDateFlow(getToday()).map { it?.stepCount ?: 0 }
     }
