@@ -43,7 +43,7 @@ val homeDataModule = module {
         userConfigRepository = get()
     ) }
 
-    single { StepSensorDataSource(get()) }
+    single<StepSensorDataSource> { StepSensorDataSource(get()) }
 
     single<DataStore<Preferences>>(named("stepSensorDataStore")) { androidContext().stepSensorDataStore }
 

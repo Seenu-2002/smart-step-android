@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -28,16 +29,15 @@ class StepRepositoryImpl(
 
     private val dateFormatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
-    // todo better use LocalDate.now().toString() but need to add desugar in gradle
     private val today: String
         get() = dateFormatter.format(Calendar.getInstance().time)
 
     override fun getTodaySteps(): Flow<Int> {
-        return stepDao.getStepsForDateFlow(getToday()).map { it?.stepCount ?: 0 }
+        return stepDao.getStepsForDateFlow(today).map { it?.stepCount ?: 0 }
     }
 
     override fun getTodayActiveSeconds(): Flow<Long> {
-        return stepDao.getStepsForDateFlow(getToday()).map { it?.activeSeconds ?: 0L }
+        return stepDao.getStepsForDateFlow(today).map { it?.activeSeconds ?: 0L }
     }
 
     override suspend fun updateStepsManually(newStepCount: Int, date: String) {
@@ -56,7 +56,7 @@ class StepRepositoryImpl(
     }
 
     override suspend fun resetToday() {
-        stepDao.deleteDate(getToday())
+        stepDao.deleteDate(today)
     }
 
     override suspend fun startCountingSteps() {
@@ -71,7 +71,7 @@ class StepRepositoryImpl(
         ) { sensorData, userConfig ->
             sensorData to userConfig
         }.collect { (sensorData, userConfig) ->
-            val today = getToday()
+            val today = today
 
             if (today != savedDate) {
                 savedDate = today
@@ -101,9 +101,4 @@ class StepRepositoryImpl(
     }
 
 
-}
-
-fun getToday(): String {
-    val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-    return formatter.format(Date())
 }
