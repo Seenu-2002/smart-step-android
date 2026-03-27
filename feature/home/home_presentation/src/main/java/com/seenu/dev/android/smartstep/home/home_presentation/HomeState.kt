@@ -1,5 +1,7 @@
 package com.seenu.dev.android.smartstep.home.home_presentation
 
+import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCardData
+
 data class HomeState constructor(
     val isFirstInstall: Boolean = false,
     val permissionDenialStep: DenialStep? = null,
@@ -17,6 +19,12 @@ data class HomeState constructor(
     val caloriesText: String = "0",
     val minutesText: String = "0",
     val isMetric: Boolean = true,
+
+    // Daily average card data
+    val dailyAverageStepsCardData: DailyAverageStepsCardData = DailyAverageStepsCardData(
+        averageStepsPerDay = 0,
+        stepsPerDay = listOf()
+    ),
 
     // EditStepDialog state
     val showEditStepsDialog: Boolean = false

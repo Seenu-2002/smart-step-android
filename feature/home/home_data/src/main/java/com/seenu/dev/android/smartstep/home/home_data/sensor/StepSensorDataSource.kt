@@ -5,24 +5,22 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
-import kotlinx.coroutines.channels.BufferOverflow
-import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 
-class StepSensorController(context: Context) : SensorEventListener {
+// TODO: REBOOT issue. Refer: Claude chat
+class StepSensorDataSource constructor(
+    context: Context,
+) : SensorEventListener {
 
     private val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as SensorManager
-    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_DETECTOR)
+    private val stepSensor: Sensor? = sensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+
+    private val _steps = MutableStateFlow(SensorData())
+    val steps: StateFlow<SensorData> = _steps
 
     private var lastStepTimestampMs: Long = 0L
-
-    // 2. Add the Flow (The "Radio Station")
-    // We use extraBufferCapacity so tryEmit never fails if the collector is slightly slow
-    private val _stepEvents = MutableSharedFlow<Long>(
-        extraBufferCapacity = 1,
-        onBufferOverflow = BufferOverflow.DROP_OLDEST
-    )
-    val stepEvents = _stepEvents.asSharedFlow()
 
     fun startListening() {
         stepSensor?.let {
@@ -36,7 +34,7 @@ class StepSensorController(context: Context) : SensorEventListener {
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
-        if (event?.sensor?.type == Sensor.TYPE_STEP_DETECTOR) {
+        if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val currentTimestampMs = System.currentTimeMillis()
             var deltaSeconds = 0L
 
@@ -49,7 +47,12 @@ class StepSensorController(context: Context) : SensorEventListener {
             
             lastStepTimestampMs = currentTimestampMs
 
-            _stepEvents.tryEmit(deltaSeconds)
+            _steps.update {
+                it.copy(
+                    totalSteps = event.values[0].toInt(),
+                    activeSeconds = deltaSeconds
+                )
+            }
         }
     }
 

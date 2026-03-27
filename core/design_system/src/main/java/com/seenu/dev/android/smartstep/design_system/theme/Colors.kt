@@ -17,3 +17,4 @@ val StrokeMain = Color(0xFFE5E7EB)
 val StrokeMainBorder = Color(0xFFD1D1D1)        // stroke main color from the nav drawer border
 
 val BottomSheetImageBorder = Color(0xFFD1D1D1)
+val AdditionalGreen = Color(0xFF0DC600)

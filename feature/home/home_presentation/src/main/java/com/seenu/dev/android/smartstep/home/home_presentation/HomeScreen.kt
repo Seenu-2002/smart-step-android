@@ -5,6 +5,7 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.Intent
+import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.LocalActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -12,10 +13,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -44,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCard
 import com.seenu.dev.android.smartstep.design_system.components.ExitConfirmationDialog
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigationDrawer
 import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
@@ -52,11 +58,13 @@ import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
 import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.components.BackgroundAccessPermission
+import com.seenu.dev.android.smartstep.home.home_presentation.components.EditStepsDialog
 import com.seenu.dev.android.smartstep.home.home_presentation.components.ObserveOnResume
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionFirstDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.components.PermissionSecondDenial
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.findActivity
 import com.seenu.dev.android.smartstep.home.home_presentation.extensions.openAppSettings
+import com.seenu.dev.android.smartstep.home.home_presentation.extensions.startSmartStepService
 import com.seenu.dev.android.smartstep.home.home_presentation.utils.ObserveAsEvents
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -138,8 +146,27 @@ fun HomeScreenRoot(
     onNavigatePersonalSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            context.startSmartStepService()
+        }
+    }
+
+    LaunchedEffect(uiState.isIgnoringBatteryOptimizations) {
+        if (uiState.isIgnoringBatteryOptimizations) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+            } else {
+                context.startSmartStepService()
+            }
+        }
+    }
 
     SmartStepNavigationDrawer(
         showFixIssueItem = !uiState.isIgnoringBatteryOptimizations,
@@ -210,6 +237,7 @@ fun HomeScreenRoot(
                     modifier = Modifier
                         .fillMaxWidth()
                         .widthIn(max = if (adaptiveLayoutType.isWide) 394.dp else Dp.Unspecified)
+                        .verticalScroll(rememberScrollState())
                         .padding(16.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -225,6 +253,10 @@ fun HomeScreenRoot(
                             isPaused = uiState.isPaused,
                             onPausePlayIconClick = { onAction(HomeAction.OnPausePlayIconClick) },
                             onPenIconClick = { onAction(HomeAction.OnEditStepsClick) }
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        DailyAverageStepsCard(
+                            data = uiState.dailyAverageStepsCardData
                         )
                     } else {
                         uiState.permissionDenialStep?.let {
@@ -262,6 +294,17 @@ fun HomeScreenRoot(
                             },
                             onDismissRequest = {
                                 onAction(HomeAction.DismissExitConfirmationDialog)
+                            }
+                        )
+                    }
+
+                    if (uiState.showEditStepsDialog) {
+                        EditStepsDialog(
+                            onSave = { steps, date ->
+                                onAction(HomeAction.OnSubmitEditedSteps(steps, date))
+                            },
+                            onDismissRequest = {
+                                onAction(HomeAction.DismissEditStepsDialog)
                             }
                         )
                     }

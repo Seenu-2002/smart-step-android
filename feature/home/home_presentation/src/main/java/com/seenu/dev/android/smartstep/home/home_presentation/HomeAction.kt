@@ -18,7 +18,7 @@ sealed interface HomeAction {
     // StepCounterCard Action
     object OnPausePlayIconClick : HomeAction
     object OnEditStepsClick : HomeAction
-    data class OnSubmitEditedSteps(val steps: Int) : HomeAction
+    data class OnSubmitEditedSteps(val steps: Int, val date: String) : HomeAction
 
     // EditStepDialog Action
     object DismissEditStepsDialog : HomeAction
