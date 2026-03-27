@@ -10,6 +10,8 @@ val homePresentationModule = module {
         get(),
         get(),
         get(),
+        get(),
+        get(),
         get()
     ) }
 }

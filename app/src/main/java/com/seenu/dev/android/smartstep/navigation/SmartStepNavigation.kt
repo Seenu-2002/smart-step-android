@@ -6,10 +6,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
+import com.seenu.dev.android.smartstep.ai_coach.presentation.AiCoachScreen
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.HomeScreen
 import com.seenu.dev.android.smartstep.profile_setup.presentation.ProfileSetupScreen
@@ -24,7 +27,7 @@ fun SmartStepNavigation(
     NavDisplay(
         backStack = backstack,
         modifier = Modifier.fillMaxSize(),
-        onBack = { backstack.removeLastOrNull() },
+        onBack = { backstack.safeRemoveLastOrNull() },
         entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
         entryProvider = { key ->
             when (key) {
@@ -61,6 +64,26 @@ fun SmartStepNavigation(
                             adaptiveLayoutType = adaptiveLayoutType,
                             onNavigatePersonalSettingsClick = {
                                 backstack.add(Route.ProfileSetupScreen)
+                            },
+                            onNavigateToAiCoach = { currentSteps, stepGoal ->
+                                backstack.add(
+                                    Route.AiCoachScreen(
+                                        currentSteps = currentSteps,
+                                        stepGoal = stepGoal
+                                    )
+                                )
+                            }
+                        )
+                    }
+                }
+
+                is Route.AiCoachScreen -> {
+                    NavEntry(key) {
+                        AiCoachScreen(
+                            currentSteps = key.currentSteps,
+                            stepGoal = key.stepGoal,
+                            onNavigateBack = {
+                                backstack.removeLastOrNull()
                             }
                         )
                     }
@@ -70,4 +93,10 @@ fun SmartStepNavigation(
             }
         }
     )
+}
+
+fun<T : NavKey> NavBackStack<T>.safeRemoveLastOrNull() {
+    if (this.size > 1) {
+        this.removeLastOrNull()
+    }
 }

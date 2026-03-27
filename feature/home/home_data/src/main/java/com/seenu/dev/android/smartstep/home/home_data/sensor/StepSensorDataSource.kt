@@ -21,36 +21,44 @@ class StepSensorDataSource(
     val steps: StateFlow<SensorData> = _steps
 
     private var lastStepTimestampMs: Long = 0L
+    private var cumulativeActiveSeconds: Long = 0L
 
     fun startListening() {
         stepSensor?.let {
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_FASTEST)
         }
+        // Reset counters at start of session
+        lastStepTimestampMs = 0L
+        cumulativeActiveSeconds = 0L
     }
 
     fun stopListening() {
         sensorManager.unregisterListener(this)
         lastStepTimestampMs = 0L
+        cumulativeActiveSeconds = 0L
     }
 
     override fun onSensorChanged(event: SensorEvent?) {
         if (event?.sensor?.type == Sensor.TYPE_STEP_COUNTER) {
             val currentTimestampMs = System.currentTimeMillis()
-            var deltaSeconds = 0L
-
-            if (lastStepTimestampMs != 0L) {
+            val deltaSeconds = if (lastStepTimestampMs != 0L) {
                 val timeDifferenceMs = currentTimestampMs - lastStepTimestampMs
-                if (timeDifferenceMs < 10_000L) {
-                    deltaSeconds = timeDifferenceMs / 1000L
-                }
-            }
-            
+                // Remove 10s cutoff; accumulate all time between steps as active time
+                (timeDifferenceMs / 1000L)
+            } else 0L
+
             lastStepTimestampMs = currentTimestampMs
+
+            // Accumulate total active seconds
+            if (deltaSeconds > 0) {
+                cumulativeActiveSeconds += deltaSeconds
+            }
 
             _steps.update {
                 it.copy(
                     totalSteps = event.values[0].toInt(),
-                    activeSeconds = deltaSeconds
+                    // Emit cumulative active seconds for the session/day
+                    activeSeconds = cumulativeActiveSeconds
                 )
             }
         }

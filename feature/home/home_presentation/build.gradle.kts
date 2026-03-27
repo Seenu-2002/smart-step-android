@@ -26,4 +26,5 @@ dependencies {
     implementation(projects.core.designSystem)
     implementation(projects.core.domain)
     implementation(projects.feature.home.homeDomain)
+    implementation(projects.feature.aiCoach)
 }

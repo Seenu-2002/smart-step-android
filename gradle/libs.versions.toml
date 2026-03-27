@@ -21,6 +21,7 @@ datastorePreferences = "1.2.0"
 kotlinxCoroutines = "1.10.2"
 kotlinxSerialization = "1.10.0"
 constraintlayout = "2.2.1"
+generativeai = "0.9.0"
 
 # Project versions
 projectApplicationId = "com.seenu.dev.android.smartstep"
@@ -63,6 +64,7 @@ window-size = { module = "androidx.compose.material3:material3-window-size-class
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
 
 # Dependencies shared across multiple subprojects
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

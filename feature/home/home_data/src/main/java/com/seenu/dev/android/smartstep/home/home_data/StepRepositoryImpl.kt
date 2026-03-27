@@ -58,9 +58,10 @@ class StepRepositoryImpl(
 
         var savedDate = stepSensorPreferences.todayDate.first()
         var offset = stepSensorPreferences.todayStepsOffset.first() ?: 0
+        var activeSecondsOffset = 0L
 
         combine(
-            stepSensorDataSource.steps.sample(5_000L),
+            stepSensorDataSource.steps.sample(500L),
             userConfigRepository.getUserConfigFlow()
         ) { sensorData, userConfig ->
             sensorData to userConfig
@@ -70,17 +71,19 @@ class StepRepositoryImpl(
             if (today != savedDate) {
                 savedDate = today
                 offset = sensorData.totalSteps
+                activeSecondsOffset = sensorData.activeSeconds
 
                 stepSensorPreferences.updateTodayData(today, offset)
             }
 
             val todaySteps = sensorData.totalSteps - offset
+            val todayActiveSeconds = (sensorData.activeSeconds - activeSecondsOffset).coerceAtLeast(0)
             stepDao.upsertStepData(
                 DailyStepEntity(
                     date = today,
                     stepCount = todaySteps,
                     stepGoal = userConfig.targetStepCount,
-                    activeSeconds = sensorData.activeSeconds
+                    activeSeconds = todayActiveSeconds
                 )
             )
         }

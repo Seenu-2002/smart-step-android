@@ -22,4 +22,8 @@ sealed interface HomeAction {
 
     // EditStepDialog Action
     object DismissEditStepsDialog : HomeAction
+
+    // AI Insights Actions
+    object OnAiInsightTryAgain : HomeAction
+    object OnLifecycleResume : HomeAction
 }

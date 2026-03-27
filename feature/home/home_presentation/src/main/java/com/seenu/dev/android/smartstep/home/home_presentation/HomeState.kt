@@ -1,5 +1,6 @@
 package com.seenu.dev.android.smartstep.home.home_presentation
 
+import com.seenu.dev.android.smartstep.ai_coach.presentation.models.AiInsightState
 import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCardData
 
 data class HomeState constructor(
@@ -27,5 +28,9 @@ data class HomeState constructor(
     ),
 
     // EditStepDialog state
-    val showEditStepsDialog: Boolean = false
+    val showEditStepsDialog: Boolean = false,
+
+    // AI Insights state
+    val aiInsightState: AiInsightState = AiInsightState.Loading,
+    val isOnline: Boolean = true
 )
