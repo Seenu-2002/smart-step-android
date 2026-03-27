@@ -2,13 +2,16 @@
 
 package com.seenu.dev.android.smartstep.home.home_data
 
+import com.seenu.dev.android.smartstep.domain.repository.UserConfigRepository
 import com.seenu.dev.android.smartstep.home.home_data.local.DailyStepEntity
 import com.seenu.dev.android.smartstep.home.home_data.local.StepDao
 import com.seenu.dev.android.smartstep.home.home_data.sensor.StepSensorDataSource
 import com.seenu.dev.android.smartstep.home.home_domain.StepRepository
 import com.seenu.dev.android.smartstep.home.home_domain.StepSensorPreferences
+import com.seenu.dev.android.smartstep.home.home_domain.model.StepsPerDay
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.sample
@@ -19,7 +22,8 @@ import java.util.Locale
 class StepRepositoryImpl(
     private val stepSensorDataSource: StepSensorDataSource,
     private val stepDao: StepDao,
-    private val stepSensorPreferences: StepSensorPreferences
+    private val stepSensorPreferences: StepSensorPreferences,
+    private val userConfigRepository: UserConfigRepository
 ) : StepRepository {
 
     override fun getTodaySteps(): Flow<Int> {
@@ -30,15 +34,19 @@ class StepRepositoryImpl(
         return stepDao.getStepsForDateFlow(getToday()).map { it?.activeSeconds ?: 0L }
     }
 
-    override suspend fun updateStepsManually(newStepCount: Int) {
-        val currentDate = getToday()
-        val currentEntry = stepDao.getStepsForDateSync(currentDate)
+    override suspend fun updateStepsManually(newStepCount: Int, date: String) {
+        val currentEntry = stepDao.getStepsForDateSync(date)
 
         if (currentEntry == null) {
-            stepDao.upsertStepData(DailyStepEntity(currentDate, newStepCount, 0L))
+            val stepGoal = userConfigRepository.getDailyStepGoal()
+            stepDao.upsertStepData(DailyStepEntity(date, newStepCount, stepGoal, 0L))
         } else {
             stepDao.upsertStepData(currentEntry.copy(stepCount = newStepCount))
         }
+    }
+
+    override suspend fun updateStepGoal(newStepGoal: Int, date: String) {
+        stepDao.updateStepGoalForDate(date, newStepGoal)
     }
 
     override suspend fun resetToday() {
@@ -51,28 +59,35 @@ class StepRepositoryImpl(
         var savedDate = stepSensorPreferences.todayDate.first()
         var offset = stepSensorPreferences.todayStepsOffset.first() ?: 0
 
-        stepSensorDataSource.steps
-            .sample(5_000L)
-            .collect { sensorData ->
-                val today = getToday()
+        combine(
+            stepSensorDataSource.steps.sample(5_000L),
+            userConfigRepository.getUserConfigFlow()
+        ) { sensorData, userConfig ->
+            sensorData to userConfig
+        }.collect { (sensorData, userConfig) ->
+            val today = getToday()
 
-                if (today != savedDate) {
-                    savedDate = today
-                    offset = sensorData.totalSteps
+            if (today != savedDate) {
+                savedDate = today
+                offset = sensorData.totalSteps
 
-                    stepSensorPreferences.updateTodayData(today, offset)
-                }
-
-                val todaySteps = sensorData.totalSteps - offset
-
-                stepDao.upsertStepData(
-                    DailyStepEntity(
-                        date = today,
-                        stepCount = todaySteps,
-                        activeSeconds = sensorData.activeSeconds
-                    )
-                )
+                stepSensorPreferences.updateTodayData(today, offset)
             }
+
+            val todaySteps = sensorData.totalSteps - offset
+            stepDao.upsertStepData(
+                DailyStepEntity(
+                    date = today,
+                    stepCount = todaySteps,
+                    stepGoal = userConfig.targetStepCount,
+                    activeSeconds = sensorData.activeSeconds
+                )
+            )
+        }
+    }
+
+    override fun getStepsForRangeFlow(startDate: String, endDate: String): Flow<List<StepsPerDay>> {
+        return stepDao.getStepsForDateRangeFlow(startDate, endDate)
     }
 
     override fun stopCountingSteps() {

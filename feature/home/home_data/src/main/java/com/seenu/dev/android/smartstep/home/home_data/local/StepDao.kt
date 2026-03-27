@@ -3,6 +3,7 @@ package com.seenu.dev.android.smartstep.home.home_data.local
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Upsert
+import com.seenu.dev.android.smartstep.home.home_domain.model.StepsPerDay
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -18,6 +19,12 @@ interface StepDao {
     @Upsert
     suspend fun upsertStepData(dailyStepEntity: DailyStepEntity)
 
+    @Query("UPDATE step_history SET stepGoal = :newStepGoal WHERE date = :date")
+    suspend fun updateStepGoalForDate(date: String, newStepGoal: Int)
+
     @Query("DELETE FROM step_history WHERE date = :date")
     suspend fun deleteDate(date: String)
+
+    @Query("SELECT date, stepCount AS steps, stepGoal as goal FROM step_history WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
+    fun getStepsForDateRangeFlow(startDate: String, endDate: String): Flow<List<StepsPerDay>>
 }

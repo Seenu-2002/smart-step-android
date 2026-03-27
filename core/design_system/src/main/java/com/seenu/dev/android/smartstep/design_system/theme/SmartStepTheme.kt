@@ -76,6 +76,9 @@ val ColorScheme.strokeMain: Color
 val ColorScheme.bottomSheetImageBorder: Color
     get() = BottomSheetImageBorder
 
+val ColorScheme.additionalGreen: Color
+    get() = AdditionalGreen
+
 @Composable
 fun SmartStepTheme(content: @Composable () -> Unit) {
     MaterialTheme(

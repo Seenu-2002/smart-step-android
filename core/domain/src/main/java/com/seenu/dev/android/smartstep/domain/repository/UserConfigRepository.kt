@@ -12,6 +12,8 @@ interface UserConfigRepository {
 
     suspend fun getUserConfig(): UserConfig
 
+    suspend fun getDailyStepGoal(): Int
+
     suspend fun updateUserConfig(userConfig: UserConfig)
 
     suspend fun updateHeightMetric(heightMetric: HeightMetric)
