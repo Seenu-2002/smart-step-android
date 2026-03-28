@@ -80,6 +80,7 @@ fun SmartStepNavigation(
                 is Route.AiCoachScreen -> {
                     NavEntry(key) {
                         AiCoachScreen(
+                            adaptiveLayoutType = adaptiveLayoutType,
                             currentSteps = key.currentSteps,
                             stepGoal = key.stepGoal,
                             onNavigateBack = {

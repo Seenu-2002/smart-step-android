@@ -5,19 +5,17 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.content
 import com.google.ai.client.generativeai.type.generationConfig
 import com.seenu.dev.android.smartstep.ai_coach.BuildConfig
+import kotlinx.coroutines.CancellationException
 
-class GeminiRepository {
+class GeminiAiCoachRepository : AiCoachRepository {
 
     private val insightModel = GenerativeModel(
-        // Use a currently supported Flash model. 2.0-flash is deprecated for new users; switch to 2.5-flash.
-        modelName = "gemini-2.5-flash-lite",
+        modelName = MODEL_NAME,
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
-            temperature = 0.5F
-            // Short, single response — keep generous but compact to avoid truncation
-            maxOutputTokens = 500
-            // Ensure plain text response
-            responseMimeType = "text/plain"
+            temperature = TEMPERATURE
+            maxOutputTokens = MAX_OUTPUT_TOKENS
+            responseMimeType = RESPONSE_MIME_TYPE
         },
         systemInstruction = content {
             text(INSIGHT_SYSTEM_PROMPT)
@@ -25,12 +23,12 @@ class GeminiRepository {
     )
 
     private val chatModel = GenerativeModel(
-        modelName = "gemini-2.5-flash-lite",
+        modelName = MODEL_NAME,
         apiKey = BuildConfig.GEMINI_API_KEY,
         generationConfig = generationConfig {
-            temperature = 0.5F
-            maxOutputTokens = 500
-            responseMimeType = "text/plain"
+            temperature = TEMPERATURE
+            maxOutputTokens = MAX_OUTPUT_TOKENS
+            responseMimeType = RESPONSE_MIME_TYPE
         },
         systemInstruction = content {
             text(CHAT_SYSTEM_PROMPT)
@@ -40,7 +38,7 @@ class GeminiRepository {
     private var currentChat: Chat? = null
     private var lastContext: ChatContext? = null
 
-    suspend fun generateInsight(
+    override suspend fun generateInsight(
         currentSteps: Int,
         stepGoal: Int,
         goalPercentage: Int,
@@ -50,12 +48,14 @@ class GeminiRepository {
             val prompt = buildInsightPrompt(currentSteps, stepGoal, goalPercentage, timeOfDay)
             val response = insightModel.generateContent(prompt)
             response.text?.trim() ?: FALLBACK_INSIGHT
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             FALLBACK_INSIGHT
         }
     }
 
-    fun createChatSession(
+    override fun createChatSession(
         currentSteps: Int,
         stepGoal: Int,
         goalPercentage: Int,
@@ -71,17 +71,19 @@ class GeminiRepository {
         )
     }
 
-    suspend fun generateGreeting(): String {
+    override suspend fun generateGreeting(): String {
         return try {
             val chat = currentChat ?: return FALLBACK_GREETING
             val response = chat.sendMessage(GREETING_PROMPT)
             response.text?.trim() ?: FALLBACK_GREETING
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             FALLBACK_GREETING
         }
     }
 
-    suspend fun generateGreeting(
+    override suspend fun generateGreeting(
         currentSteps: Int,
         stepGoal: Int,
         goalPercentage: Int,
@@ -94,22 +96,26 @@ class GeminiRepository {
             val chat = currentChat ?: return FALLBACK_GREETING
             val response = chat.sendMessage(GREETING_PROMPT)
             response.text?.trim() ?: FALLBACK_GREETING
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             FALLBACK_GREETING
         }
     }
 
-    suspend fun sendMessage(userMessage: String): String {
+    override suspend fun sendMessage(userMessage: String): String {
         return try {
             val chat = currentChat ?: return FALLBACK_RESPONSE
             val response = chat.sendMessage(userMessage)
             response.text?.trim() ?: FALLBACK_RESPONSE
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             FALLBACK_RESPONSE
         }
     }
 
-    suspend fun sendMessage(
+    override suspend fun sendMessage(
         userMessage: String,
         currentSteps: Int,
         stepGoal: Int,
@@ -123,6 +129,8 @@ class GeminiRepository {
             val chat = currentChat ?: return FALLBACK_RESPONSE
             val response = chat.sendMessage(userMessage)
             response.text?.trim() ?: FALLBACK_RESPONSE
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             FALLBACK_RESPONSE
         }
@@ -181,6 +189,11 @@ class GeminiRepository {
     }
 
     companion object {
+        private const val MODEL_NAME = "gemini-2.5-flash-lite"
+        private const val TEMPERATURE = 0.5F
+        private const val MAX_OUTPUT_TOKENS = 500
+        private const val RESPONSE_MIME_TYPE = "text/plain"
+
         private const val INSIGHT_SYSTEM_PROMPT = """
             You are a concise AI fitness coach embedded in a step counter app.
             Rules:
@@ -218,10 +231,3 @@ class GeminiRepository {
         private const val FALLBACK_RESPONSE = "I'm sorry, I couldn't process that right now. Please try again in a moment."
     }
 }
-
-data class ChatContext(
-    val currentSteps: Int,
-    val stepGoal: Int,
-    val goalPercentage: Int,
-    val timeOfDay: String
-)
