@@ -51,8 +51,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -63,6 +61,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.seenu.dev.android.core.design_system.R
 import com.seenu.dev.android.smartstep.ai_coach.presentation.models.ChatMessage
+import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.design_system.theme.buttonSecondary
 import com.seenu.dev.android.smartstep.design_system.theme.Inter
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
@@ -75,6 +74,7 @@ import org.koin.core.parameter.parametersOf
 
 @Composable
 fun AiCoachScreen(
+    adaptiveLayoutType: AdaptiveLayoutType,
     currentSteps: Int,
     stepGoal: Int,
     onNavigateBack: () -> Unit
@@ -85,6 +85,7 @@ fun AiCoachScreen(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     AiCoachScreenRoot(
+        adaptiveLayoutType = adaptiveLayoutType,
         state = uiState,
         onAction = viewModel::onAction,
         onNavigateBack = onNavigateBack
@@ -97,6 +98,7 @@ fun AiCoachScreen(
 private fun AiCoachScreenMobilePreview() {
     SmartStepTheme {
         AiCoachScreenRoot(
+            adaptiveLayoutType = AdaptiveLayoutType.Mobile,
             state = AiCoachState(
                 messages = listOf(
                     ChatMessage(
@@ -121,6 +123,7 @@ private fun AiCoachScreenMobilePreview() {
 private fun AiCoachScreenWidePreview() {
     SmartStepTheme {
         AiCoachScreenRoot(
+            adaptiveLayoutType = AdaptiveLayoutType.Tablet,
             state = AiCoachState(
                 messages = listOf(
                     ChatMessage(
@@ -141,15 +144,12 @@ private fun AiCoachScreenWidePreview() {
 
 @Composable
 private fun AiCoachScreenRoot(
+    adaptiveLayoutType: AdaptiveLayoutType,
     state: AiCoachState,
     onAction: (AiCoachAction) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val listState = rememberLazyListState()
-    val windowInfo = LocalWindowInfo.current
-    val density = LocalDensity.current
-    val screenWidthDp = with(density) { windowInfo.containerSize.width.toDp() }
-    val isWideScreen = screenWidthDp >= 840.dp
 
     // Scroll to bottom when messages change
     LaunchedEffect(state.messages.size) {
@@ -201,7 +201,7 @@ private fun AiCoachScreenRoot(
                         if (!state.isOnline || state.isAiResponding) return@BottomInputArea
                         onAction(AiCoachAction.SendMessage(suggestion))
                     },
-                    modifier = if (isWideScreen) Modifier.width(400.dp) else Modifier.fillMaxWidth()
+                    modifier = if (adaptiveLayoutType.isWide) Modifier.width(400.dp) else Modifier.fillMaxWidth()
                 )
             }
         },
@@ -226,7 +226,7 @@ private fun AiCoachScreenRoot(
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 14.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = if (isWideScreen) Alignment.CenterHorizontally else Alignment.Start
+                horizontalAlignment = if (adaptiveLayoutType.isWide) Alignment.CenterHorizontally else Alignment.Start
             ) {
                 itemsIndexed(state.messages, key = { index, _ -> index }) { _, message ->
                     ChatBubble(

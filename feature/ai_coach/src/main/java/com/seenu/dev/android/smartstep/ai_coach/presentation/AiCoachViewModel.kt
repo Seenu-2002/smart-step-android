@@ -2,7 +2,7 @@ package com.seenu.dev.android.smartstep.ai_coach.presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.seenu.dev.android.smartstep.ai_coach.data.GeminiRepository
+import com.seenu.dev.android.smartstep.ai_coach.data.AiCoachRepository
 import com.seenu.dev.android.smartstep.ai_coach.data.TimeOfDayProvider
 import com.seenu.dev.android.smartstep.ai_coach.presentation.models.ChatMessage
 import com.seenu.dev.android.smartstep.domain.connectivity.ConnectivityObserver
@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class AiCoachViewModel(
-    private val geminiRepository: GeminiRepository,
+    private val aiCoachRepository: AiCoachRepository,
     private val connectivityObserver: ConnectivityObserver,
     private val currentSteps: Int,
     private val stepGoal: Int
@@ -71,7 +71,7 @@ class AiCoachViewModel(
                 )
             }
 
-            val greeting = geminiRepository.generateGreeting(
+            val greeting = aiCoachRepository.generateGreeting(
                 currentSteps = currentSteps,
                 stepGoal = stepGoal,
                 goalPercentage = goalPercentage,
@@ -103,7 +103,7 @@ class AiCoachViewModel(
         viewModelScope.launch {
             val goalPercentage = if (stepGoal > 0) (currentSteps * 100) / stepGoal else 0
             val timeOfDay = TimeOfDayProvider.getTimeOfDay()
-            val response = geminiRepository.sendMessage(
+            val response = aiCoachRepository.sendMessage(
                 userMessage = text.trim(),
                 currentSteps = currentSteps,
                 stepGoal = stepGoal,

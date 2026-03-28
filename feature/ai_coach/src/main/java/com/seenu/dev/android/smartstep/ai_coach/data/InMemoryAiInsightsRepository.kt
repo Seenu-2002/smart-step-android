@@ -1,17 +1,20 @@
 package com.seenu.dev.android.smartstep.ai_coach.data
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.async
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
 
 class InMemoryAiInsightsRepository(
-    private val geminiRepository: GeminiRepository,
+    private val aiCoachRepository: AiCoachRepository,
     private val config: AiInsightsConfig = AiInsightsConfig(),
-    private val appScope: CoroutineScope? = null // optional shared scope for de-dupe tasks
+    private val appScope: CoroutineScope
 ) : AiInsightsRepository {
 
     private data class CacheKey(
@@ -31,7 +34,7 @@ class InMemoryAiInsightsRepository(
     private val cache = ConcurrentHashMap<CacheKey, Entry>()
     private val inFlight = HashMap<CacheKey, Deferred<String>>()
     private val mutex = Mutex()
-    private val lock = Any()
+
     private companion object {
         private const val FALLBACK_INSIGHT = "Keep moving — every step counts!"
     }
@@ -66,10 +69,9 @@ class InMemoryAiInsightsRepository(
         // De-duplicate concurrent calls per key
         return mutex.withLock {
             inFlight[key]?.let { return@withLock it }
-            val scope = appScope ?: CoroutineScope(Dispatchers.IO)
-            val deferred = scope.async(Dispatchers.IO) {
-                runCatching {
-                    val insight = geminiRepository.generateInsight(
+            val deferred = appScope.async(Dispatchers.IO) {
+                try {
+                    val insight = aiCoachRepository.generateInsight(
                         currentSteps = currentSteps,
                         stepGoal = stepGoal,
                         goalPercentage = goalPct,
@@ -84,15 +86,20 @@ class InMemoryAiInsightsRepository(
                     cache[key] = entry
                     maybeEvict()
                     insight
-                }.getOrElse {
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
                     val ageOk = cached?.let { (nowMillis - it.generatedAtMillis) / 60000L < config.maxStalenessMinutes } == true
                     if (ageOk) cached!!.insight else FALLBACK_INSIGHT
+                } finally {
+                    withContext(NonCancellable) {
+                        mutex.withLock {
+                            inFlight.remove(key)
+                        }
+                    }
                 }
             }
             inFlight[key] = deferred
-            deferred.invokeOnCompletion {
-                synchronized(lock) { inFlight.remove(key) }
-            }
             deferred
         }.await()
     }
