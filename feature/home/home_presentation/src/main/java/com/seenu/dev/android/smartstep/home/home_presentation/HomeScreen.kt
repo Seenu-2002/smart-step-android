@@ -49,6 +49,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.seenu.dev.android.smartstep.ai_coach.presentation.components.AiInsightsCard
 import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCard
 import com.seenu.dev.android.smartstep.design_system.components.ExitConfirmationDialog
 import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigationDrawer
@@ -76,6 +77,7 @@ fun HomeScreen(
     adaptiveLayoutType: AdaptiveLayoutType,
     modifier: Modifier = Modifier,
     onNavigatePersonalSettingsClick: () -> Unit,
+    onNavigateToAiCoach: (currentSteps: Int, stepGoal: Int) -> Unit = { _, _ -> },
     homeViewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState = homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -126,6 +128,7 @@ fun HomeScreen(
 
     ObserveOnResume(onResume = {
         homeViewModel.onAction(HomeAction.CheckIsIgnoringBatteryOptimizations)
+        homeViewModel.onAction(HomeAction.OnLifecycleResume)
     })
 
     HomeScreenRoot(
@@ -133,6 +136,9 @@ fun HomeScreen(
         uiState = uiState.value,
         onAction = homeViewModel::onAction,
         onNavigatePersonalSettingsClick = onNavigatePersonalSettingsClick,
+        onNavigateToAiCoach = {
+            onNavigateToAiCoach(uiState.value.currentSteps, uiState.value.stepGoal)
+        },
         modifier = modifier,
     )
 }
@@ -144,7 +150,8 @@ fun HomeScreenRoot(
     uiState: HomeState,
     onAction: (HomeAction) -> Unit,
     onNavigatePersonalSettingsClick: () -> Unit,
-    modifier: Modifier = Modifier,
+    onNavigateToAiCoach: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
@@ -218,11 +225,11 @@ fun HomeScreenRoot(
                         )
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.background
                     )
                 )
             },
-            containerColor = MaterialTheme.colorScheme.backgroundSecondary
+            containerColor = MaterialTheme.colorScheme.background
         ) { innerPadding ->
 
             val context = LocalContext.current
@@ -257,6 +264,12 @@ fun HomeScreenRoot(
                         Spacer(modifier = Modifier.height(8.dp))
                         DailyAverageStepsCard(
                             data = uiState.dailyAverageStepsCardData
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        AiInsightsCard(
+                            insightState = uiState.aiInsightState,
+                            onMoreClick = onNavigateToAiCoach,
+                            onTryAgainClick = { onAction(HomeAction.OnAiInsightTryAgain) }
                         )
                     } else {
                         uiState.permissionDenialStep?.let {

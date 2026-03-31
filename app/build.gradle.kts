@@ -70,4 +70,6 @@ dependencies {
     implementation(projects.feature.home.homePresentation)
     implementation(projects.feature.home.homeDomain)
     implementation(projects.feature.home.homeData)
+
+    implementation(projects.feature.aiCoach)
 }

@@ -2,8 +2,12 @@ package com.seenu.dev.android.smartstep.home.home_presentation
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.seenu.dev.android.smartstep.ai_coach.data.AiInsightsRepository
+import com.seenu.dev.android.smartstep.ai_coach.data.TimeOfDayProvider
+import com.seenu.dev.android.smartstep.ai_coach.presentation.models.AiInsightState
 import com.seenu.dev.android.smartstep.design_system.components.DailyAverageStepsCardData
 import com.seenu.dev.android.smartstep.design_system.components.StepsPerDayData
+import com.seenu.dev.android.smartstep.domain.connectivity.ConnectivityObserver
 import com.seenu.dev.android.smartstep.domain.extensions.toCentimeters
 import com.seenu.dev.android.smartstep.domain.model.Gender
 import com.seenu.dev.android.smartstep.domain.model.HeightMetric
@@ -38,7 +42,9 @@ class HomeViewModel(
     private val preferenceManager: PreferenceManager,
     private val batteryOptimizationRepository: BatteryOptimizationRepository,
     private val stepRepository: StepRepository,
-    private val userConfigRepository: UserConfigRepository
+    private val userConfigRepository: UserConfigRepository,
+    private val aiInsightsRepository: AiInsightsRepository,
+    private val connectivityObserver: ConnectivityObserver
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeState())
@@ -49,13 +55,19 @@ class HomeViewModel(
 
     private var lastCalculatedSteps = 0
 
+    // AI Insight tracking
+    private var hasGeneratedInitialInsight = false
+    private var previousGoalReached = false
+    private var previousStepGoal = 0
+
     init {
         checkActivityRecognitionPermission()
         observeUserConfig()
 
         observePauseState()
         observeStepsAndCalculate()
-        observerDailyAverageSteps()
+        observeDailyAverageSteps()
+        observeConnectivity()
     }
 
     fun onAction(homeAction: HomeAction) {
@@ -184,6 +196,21 @@ class HomeViewModel(
                     _uiState.update { it.copy(showEditStepsDialog = false) }
                 }
             }
+
+            // AI Insights Actions
+            HomeAction.OnAiInsightTryAgain -> {
+                viewModelScope.launch {
+                    val currentlyOnline = connectivityObserver.isOnline.first()
+                    _uiState.update { it.copy(isOnline = currentlyOnline) }
+                    if (currentlyOnline) {
+                        refreshAiInsight()
+                    }
+                }
+            }
+
+            HomeAction.OnLifecycleResume -> {
+                refreshAiInsight()
+            }
         }
     }
 
@@ -216,16 +243,22 @@ class HomeViewModel(
     private fun observeUserConfig() {
         viewModelScope.launch {
             userConfigRepository.getUserConfigFlow().collect { userConfig ->
+                val oldGoal = _uiState.value.stepGoal
                 _uiState.update {
                     it.copy(
                         stepGoal = userConfig.targetStepCount
                     )
                 }
+                // Trigger 4: step goal changed
+                if (oldGoal != 0 && oldGoal != userConfig.targetStepCount) {
+                    previousStepGoal = userConfig.targetStepCount
+                    refreshAiInsight()
+                }
             }
         }
     }
 
-    private fun observerDailyAverageSteps() {
+    private fun observeDailyAverageSteps() {
         viewModelScope.launch {
             // TODO: Should be injected via DI
             val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
@@ -234,24 +267,45 @@ class HomeViewModel(
             calendar.add(Calendar.DAY_OF_YEAR, -6)
             val startingDate = formatter.format(calendar.time)
             stepRepository.getStepsForRangeFlow(startingDate, today).collect { stepsPerDay ->
-                val data = if (stepsPerDay.isEmpty()) {
-                    DailyAverageStepsCardData(
-                        averageStepsPerDay = 0,
-                        stepsPerDay = emptyList()
-                    )
-                } else {
-                    val averageStepsPerDay = stepsPerDay.sumOf { it.steps } / 7 // Assuming 7 days in the range
-                    DailyAverageStepsCardData(
-                        averageStepsPerDay = averageStepsPerDay,
-                        stepsPerDay = stepsPerDay.map { stepData ->
-                            StepsPerDayData(
-                                dayLabelRes = getDayLabelResForDate(stepData.date),
-                                steps = stepData.steps,
-                                goal = stepData.goal
-                            )
-                        }
-                    )
+                // Build a continuous 7-day range [start..today], fill missing days with 0 steps
+                val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val startCal = Calendar.getInstance().apply {
+                    time = formatter.parse(startingDate) ?: Date()
                 }
+                val endCal = Calendar.getInstance().apply {
+                    time = formatter.parse(today) ?: Date()
+                }
+
+                // Index existing results by date for quick lookup
+                val byDate = stepsPerDay.associateBy { it.date }
+
+                // Fallback goal if a particular day doesn't have one stored
+                val fallbackGoal = _uiState.value.stepGoal
+
+                val filled = mutableListOf<StepsPerDayData>()
+                var cursor = startCal.clone() as Calendar
+                var totalSteps = 0
+                while (!cursor.after(endCal)) {
+                    val dateStr = formatter.format(cursor.time)
+                    val record = byDate[dateStr]
+                    val steps = record?.steps ?: 0
+                    val goal = record?.goal ?: fallbackGoal
+                    totalSteps += steps
+
+                    filled += StepsPerDayData(
+                        dayLabelRes = getDayLabelResForDate(dateStr),
+                        steps = steps,
+                        goal = goal
+                    )
+
+                    cursor.add(Calendar.DAY_OF_YEAR, 1)
+                }
+
+                val averageStepsPerDay = if (filled.isNotEmpty()) totalSteps / filled.size else 0
+                val data = DailyAverageStepsCardData(
+                    averageStepsPerDay = averageStepsPerDay,
+                    stepsPerDay = filled
+                )
 
                 _uiState.update {
                     it.copy(dailyAverageStepsCardData = data)
@@ -347,6 +401,59 @@ class HomeViewModel(
                     minutesText = minutes.toString()
                 )
             }
+
+            // Trigger 3: step count crosses daily goal
+            val goal = state.stepGoal
+            if (goal > 0) {
+                val goalNowReached = currentSteps >= goal
+                if (goalNowReached && !previousGoalReached) {
+                    previousGoalReached = true
+                    refreshAiInsight()
+                } else if (!goalNowReached) {
+                    previousGoalReached = false
+                }
+            }
+        }
+    }
+
+    // --- AI Insight logic ---
+
+    private fun observeConnectivity() {
+        connectivityObserver.isOnline
+            .onEach { online ->
+                _uiState.update { it.copy(isOnline = online) }
+                if (online && _uiState.value.aiInsightState is AiInsightState.Offline) {
+                    refreshAiInsight()
+                }
+            }
+            .launchIn(viewModelScope)
+    }
+
+    fun refreshAiInsight() {
+        val state = _uiState.value
+        if (!state.isOnline) {
+            _uiState.update { it.copy(aiInsightState = AiInsightState.Offline) }
+            return
+        }
+
+        _uiState.update { it.copy(aiInsightState = AiInsightState.Loading) }
+
+        viewModelScope.launch {
+            val goalPercentage = if (state.stepGoal > 0) {
+                (state.currentSteps * 100) / state.stepGoal
+            } else 0
+            val timeOfDay = TimeOfDayProvider.getTimeOfDay()
+
+            val insight = aiInsightsRepository.getInsight(
+                currentSteps = state.currentSteps,
+                stepGoal = state.stepGoal,
+                timeOfDay = timeOfDay
+            )
+
+            _uiState.update {
+                it.copy(aiInsightState = AiInsightState.Success(insight))
+            }
+            hasGeneratedInitialInsight = true
         }
     }
 }

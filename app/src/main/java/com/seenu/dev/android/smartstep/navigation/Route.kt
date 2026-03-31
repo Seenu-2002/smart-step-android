@@ -15,4 +15,10 @@ sealed interface Route : NavKey {
     @Serializable
     data object StepCounterScreen : Route
 
+    @Serializable
+    data class AiCoachScreen(
+        val currentSteps: Int,
+        val stepGoal: Int
+    ) : Route
+
 }

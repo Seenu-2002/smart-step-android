@@ -1,6 +1,7 @@
 package com.seenu.dev.android.smartstep
 
 import android.app.Application
+import com.seenu.dev.android.smartstep.ai_coach.di.aiCoachModule
 import com.seenu.dev.android.smartstep.data.di.coreDataModule
 import com.seenu.dev.android.smartstep.di.appModule
 import com.seenu.dev.android.smartstep.home.home_data.di.homeDataModule
@@ -27,6 +28,7 @@ class SmartStepApp : Application() {
                 homeDataModule,
                 coreDataModule,
                 profileSetupModule,
+                aiCoachModule,
             )
         }
     }
