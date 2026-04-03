@@ -41,7 +41,7 @@ class SmartStepNotificationService : Service() {
     private lateinit var expandedView: RemoteViews
     private lateinit var collapsedViews: RemoteViews
     private lateinit var notificationBuilder: NotificationCompat.Builder
-    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+    private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private var observationJob: Job? = null
 
     override fun onCreate() {

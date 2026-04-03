@@ -56,7 +56,6 @@ import com.seenu.dev.android.smartstep.design_system.components.SmartStepNavigat
 import com.seenu.dev.android.smartstep.design_system.components.StepCounterCard
 import com.seenu.dev.android.smartstep.design_system.components.StepGoalBottomSheet
 import com.seenu.dev.android.smartstep.design_system.theme.SmartStepTheme
-import com.seenu.dev.android.smartstep.design_system.theme.backgroundSecondary
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.components.BackgroundAccessPermission
 import com.seenu.dev.android.smartstep.home.home_presentation.components.EditStepsDialog
@@ -78,6 +77,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onNavigatePersonalSettingsClick: () -> Unit,
     onNavigateToAiCoach: (currentSteps: Int, stepGoal: Int) -> Unit = { _, _ -> },
+    onNavigateToWeeklyReport: () -> Unit = {},
     homeViewModel: HomeViewModel = koinViewModel()
 ) {
     val uiState = homeViewModel.uiState.collectAsStateWithLifecycle()
@@ -139,6 +139,7 @@ fun HomeScreen(
         onNavigateToAiCoach = {
             onNavigateToAiCoach(uiState.value.currentSteps, uiState.value.stepGoal)
         },
+        onNavigateToWeeklyReport = onNavigateToWeeklyReport,
         modifier = modifier,
     )
 }
@@ -151,6 +152,7 @@ fun HomeScreenRoot(
     onAction: (HomeAction) -> Unit,
     onNavigatePersonalSettingsClick: () -> Unit,
     onNavigateToAiCoach: () -> Unit = {},
+    onNavigateToWeeklyReport: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -259,7 +261,8 @@ fun HomeScreenRoot(
                             // Pass the pause state and actions
                             isPaused = uiState.isPaused,
                             onPausePlayIconClick = { onAction(HomeAction.OnPausePlayIconClick) },
-                            onPenIconClick = { onAction(HomeAction.OnEditStepsClick) }
+                            onPenIconClick = { onAction(HomeAction.OnEditStepsClick) },
+                            onCardClicked = onNavigateToWeeklyReport
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         DailyAverageStepsCard(

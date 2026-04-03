@@ -22,6 +22,7 @@ kotlinxCoroutines = "1.10.2"
 kotlinxSerialization = "1.10.0"
 constraintlayout = "2.2.1"
 generativeai = "0.9.0"
+desugar = "2.0.4"
 
 # Project versions
 projectApplicationId = "com.seenu.dev.android.smartstep"
@@ -60,11 +61,13 @@ koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "k
 koin-annotation-compiler = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotation" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
+androidx-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "nav3Core" }
 window-size = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastorePreferences" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 generativeai = { group = "com.google.ai.client.generativeai", name = "generativeai", version.ref = "generativeai" }
+desugar = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "desugar" }
 
 # Dependencies shared across multiple subprojects
 android-gradlePlugin = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }

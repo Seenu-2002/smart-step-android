@@ -7,6 +7,7 @@ import com.seenu.dev.android.smartstep.di.appModule
 import com.seenu.dev.android.smartstep.home.home_data.di.homeDataModule
 import com.seenu.dev.android.smartstep.home.home_presentation.di.homePresentationModule
 import com.seenu.dev.android.smartstep.profile_setup.di.profileSetupModule
+import com.seenu.dev.android.smartstep.weekly_report.di.weeklyReportModule
 import org.koin.android.ext.koin.androidContext
 import org.koin.android.ext.koin.androidLogger
 import org.koin.core.context.startKoin
@@ -29,6 +30,7 @@ class SmartStepApp : Application() {
                 coreDataModule,
                 profileSetupModule,
                 aiCoachModule,
+                weeklyReportModule
             )
         }
     }
