@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
 import androidx.navigation3.runtime.NavBackStack
 import androidx.navigation3.runtime.NavEntry
 import androidx.navigation3.runtime.NavKey
@@ -16,6 +17,7 @@ import com.seenu.dev.android.smartstep.ai_coach.presentation.AiCoachScreen
 import com.seenu.dev.android.smartstep.design_system.utils.AdaptiveLayoutType
 import com.seenu.dev.android.smartstep.home.home_presentation.HomeScreen
 import com.seenu.dev.android.smartstep.profile_setup.presentation.ProfileSetupScreen
+import com.seenu.dev.android.smartstep.weekly_report.presentation.WeeklyReportScreen
 
 @Composable
 fun SmartStepNavigation(
@@ -28,7 +30,10 @@ fun SmartStepNavigation(
         backStack = backstack,
         modifier = Modifier.fillMaxSize(),
         onBack = { backstack.safeRemoveLastOrNull() },
-        entryDecorators = listOf(rememberSaveableStateHolderNavEntryDecorator()),
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
         entryProvider = { key ->
             when (key) {
                 Route.OnBoardingScreen -> {
@@ -72,6 +77,9 @@ fun SmartStepNavigation(
                                         stepGoal = stepGoal
                                     )
                                 )
+                            },
+                            onNavigateToWeeklyReport = {
+                                backstack.add(Route.WeeklyReportScreen)
                             }
                         )
                     }
@@ -83,6 +91,17 @@ fun SmartStepNavigation(
                             adaptiveLayoutType = adaptiveLayoutType,
                             currentSteps = key.currentSteps,
                             stepGoal = key.stepGoal,
+                            onNavigateBack = {
+                                backstack.removeLastOrNull()
+                            }
+                        )
+                    }
+                }
+
+                is Route.WeeklyReportScreen -> {
+                    NavEntry(key) {
+                        WeeklyReportScreen(
+                            adaptiveLayoutType = adaptiveLayoutType,
                             onNavigateBack = {
                                 backstack.removeLastOrNull()
                             }

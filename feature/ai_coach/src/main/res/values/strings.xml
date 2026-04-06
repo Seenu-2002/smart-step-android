@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ai_coach_title">AI Coach</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_ai">AI</string>
+    <string name="quick_suggestions">Quick Suggestions</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+    <string name="suggest_recommend_workout">Recommend a workout</string>
+    <string name="suggest_explain_todays_trend">Explain today\'s trend</string>
+    <string name="suggest_how_to_reach_todays_goal">How to reach today\'s goal</string>
+    <string name="offline_required">Online connection required</string>
+    <string name="input_placeholder">Type a message...</string>
+    <string name="cd_send">Send</string>
+    
+    <!-- AiInsightsCard strings -->
+    <string name="try_again">Try again</string>
+    <string name="cd_refresh">Refresh</string>
+    <string name="more">More</string>
+    <string name="cd_more">See more</string>
+    <string name="offline_connect_for_insights">Connect to the internet for AI insights</string>
+</resources>
