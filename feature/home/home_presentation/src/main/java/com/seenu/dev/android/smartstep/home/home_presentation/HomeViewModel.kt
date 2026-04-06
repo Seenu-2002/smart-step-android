@@ -167,6 +167,7 @@ class HomeViewModel(
                     _uiState.update {
                         it.copy(stepGoal = homeAction.stepGoal, showStepGoalSheet = false)
                     }
+                    refreshAiInsight()
                 }
             }
 
@@ -253,6 +254,8 @@ class HomeViewModel(
                 if (oldGoal != 0 && oldGoal != userConfig.targetStepCount) {
                     previousStepGoal = userConfig.targetStepCount
                     refreshAiInsight()
+                } else if (oldGoal == 0) {
+                    previousStepGoal = userConfig.targetStepCount
                 }
             }
         }

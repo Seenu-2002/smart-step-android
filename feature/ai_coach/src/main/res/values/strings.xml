@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Screen titles and actions -->
+    <string name="ai_coach_title">AI Coach</string>
+    <string name="cd_back">Back</string>
+    <string name="cd_send">Send</string>
+
+    <!-- Suggestions section -->
+    <string name="quick_suggestions">Quick suggestions</string>
+    <string name="collapse">Collapse</string>
+    <string name="expand">Expand</string>
+    <string name="suggest_recommend_workout">Recommend workout</string>
+    <string name="suggest_explain_todays_trend">Explain today\'s trend</string>
+    <string name="suggest_how_to_reach_todays_goal">How to reach today\'s goal?</string>
+
+    <!-- Input and connectivity -->
+    <string name="offline_required">📡 Online connection required</string>
+    <string name="input_placeholder">Ask your AI coach...</string>
+
+    <!-- Icons content descriptions -->
+    <string name="cd_ai">AI</string>
+    <string name="cd_refresh">Refresh</string>
+    <string name="cd_more">More</string>
+    <string name="cd_offline">Offline</string>
+
+    <!-- Cards and buttons -->
+    <string name="try_again">Try Again</string>
+    <string name="more">More</string>
+    <string name="offline_connect_for_insights">📡 Connect to the internet to get AI insights.</string>
+</resources>

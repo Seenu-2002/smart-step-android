@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
@@ -522,7 +523,10 @@ private fun BottomInputArea(
             ) {
                 if (!isOnline) {
                     // Offline state
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
                         Text(
                             text = stringResource(com.seenu.dev.android.smartstep.ai_coach.R.string.offline_required),
                             style = TextStyle(
@@ -531,7 +535,8 @@ private fun BottomInputArea(
                                 fontSize = 14.sp,
                                 lineHeight = 18.sp
                             ),
-                            color = MaterialTheme.colorScheme.onSecondary
+                            color = MaterialTheme.colorScheme.onSecondary,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 } else {
@@ -576,12 +581,12 @@ private fun BottomInputArea(
                 modifier = Modifier
                     .size(44.dp)
                     .clip(CircleShape)
-                    .background(if (canSend) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.buttonSecondary)
+                    .background(if (canSend) MaterialTheme.colorScheme.primary else Color.Gray.copy(alpha = 0.3f))
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(R.drawable.ic_send),
                     contentDescription = stringResource(com.seenu.dev.android.smartstep.ai_coach.R.string.cd_send),
-                    tint = if (canSend) MaterialTheme.colorScheme.textWhite else MaterialTheme.colorScheme.primary,
+                    tint = if (canSend) MaterialTheme.colorScheme.textWhite else Color.Gray,
                     modifier = Modifier
                         .size(20.dp)
                         .offset(x = 1.dp)
