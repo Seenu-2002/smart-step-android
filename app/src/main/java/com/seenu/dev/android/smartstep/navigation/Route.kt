@@ -21,4 +21,7 @@ sealed interface Route : NavKey {
         val stepGoal: Int
     ) : Route
 
+    @Serializable
+    data object WeeklyReportScreen : Route
+
 }

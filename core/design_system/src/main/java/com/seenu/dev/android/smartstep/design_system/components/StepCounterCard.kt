@@ -61,6 +61,7 @@ fun StepCounterCard(
 
     onPenIconClick: (() -> Unit)? = null,
     onPausePlayIconClick: (() -> Unit)? = null,
+    onCardClicked: () -> Unit = {}
 ) {
     Column(
         Modifier
@@ -70,7 +71,10 @@ fun StepCounterCard(
                 color = MaterialTheme.colorScheme.primary,
                 shape = MaterialTheme.shapes.large
             )
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable(
+                onClick = onCardClicked
+            ),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colorScheme.textWhite) {
@@ -101,14 +105,30 @@ fun StepCounterCard(
                 )
             }
 
-            Text(
-                text = stringResource(R.string.current_steps, currentStepCount),
-                style = MaterialTheme.typography.title,
-                fontFamily = Inter,
-                color = MaterialTheme.colorScheme.textWhite.copy(
-                    alpha = if (isPaused) 0.2f else 1f
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.current_steps, currentStepCount),
+                    style = MaterialTheme.typography.title,
+                    fontFamily = Inter,
+                    color = MaterialTheme.colorScheme.textWhite.copy(
+                        alpha = if (isPaused) 0.2f else 1f
+                    )
                 )
-            )
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                Text(
+                    text = stringResource(R.string.report),
+                    style = MaterialTheme.typography.bodyLargeMedium
+                )
+                Icon(
+                    painter = painterResource(R.drawable.ic_arrow_right),
+                    contentDescription = "Report Icon",
+                )
+
+            }
 
             Text(
                 text =

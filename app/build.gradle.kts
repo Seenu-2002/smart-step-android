@@ -27,6 +27,10 @@ android {
             )
         }
     }
+
+    compileOptions {
+        isCoreLibraryDesugaringEnabled = true
+    }
 }
 
 dependencies {
@@ -52,6 +56,7 @@ dependencies {
     // Nav3
     implementation(libs.androidx.navigation3.runtime)
     implementation(libs.androidx.navigation3.ui)
+    implementation(libs.androidx.viewmodel.navigation3)
 
     // WindowSize
     implementation(libs.window.size)
@@ -72,4 +77,6 @@ dependencies {
     implementation(projects.feature.home.homeData)
 
     implementation(projects.feature.aiCoach)
+    implementation(projects.feature.weeklyReport)
+    coreLibraryDesugaring(libs.desugar)
 }

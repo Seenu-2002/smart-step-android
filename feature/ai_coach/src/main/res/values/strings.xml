@@ -15,7 +15,7 @@
 
     <!-- Input and connectivity -->
     <string name="offline_required">📡 Online connection required</string>
-    <string name="input_placeholder">Ask your AI coach...</string>
+    <string name="input_placeholder">Ask your AI coach…</string>
 
     <!-- Icons content descriptions -->
     <string name="cd_ai">AI</string>
