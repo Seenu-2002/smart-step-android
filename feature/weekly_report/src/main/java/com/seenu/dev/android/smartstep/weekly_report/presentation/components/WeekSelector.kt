@@ -29,7 +29,12 @@ fun WeekSelector(
     dateRange: WeekRange,
     onAction: (WeeklyReportAction) -> Unit
 ) {
-    val formatter =  remember { DateTimeFormatter.ofPattern("MMM d") }
+    val formatter = remember { DateTimeFormatter.ofPattern("MMM d") }
+    val dateRangeText = remember(dateRange) {
+        val startDate = dateRange.start.format(formatter)
+        val endDate = dateRange.end.format(formatter)
+        "$startDate - $endDate"
+    }
 
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -50,10 +55,8 @@ fun WeekSelector(
             )
         }
 
-        val startDate = dateRange.start.format(formatter)
-        val endDate = dateRange.end.format(formatter)
         Text(
-            text = "$startDate - $endDate",
+            text = dateRangeText,
             modifier = Modifier.padding(horizontal = 16.dp),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.Bold,
